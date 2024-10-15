@@ -89,10 +89,10 @@ export class MemeJettonMinter implements Contract {
     })
   }
 
-  async sendBuy(provider: ContractProvider, via: Sender, value: bigint, queryId: number = 0) {
+  async sendBuy(provider: ContractProvider, via: Sender, value: bigint, minReceive: bigint, queryId: number = 0) {
     await provider.internal(via, {
       value: value + Fee.buyFee,
-      body: beginCell().storeUint(Op.buy, 32).storeUint(queryId, 64).storeCoins(value).endCell(),
+      body: beginCell().storeUint(Op.buy, 32).storeUint(queryId, 64).storeCoins(value).storeCoins(minReceive).endCell(),
     })
   }
 

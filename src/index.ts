@@ -7,6 +7,7 @@ import { getJettonMinterCode, getJettonWalletCode, getMemeJettonMinterCode } fro
 import { JettonWallet } from './contracts/JettonWallet'
 import { JettonMinter } from '@ton-community/assets-sdk'
 import { PTON_ADDRESS, PTON_ADDRESS_TESTNET, STON_FI_ROUTER_ADDRESS, STON_FI_ROUTER_ADDRESS_TESTNET } from './constants'
+import { MAX_SUPPLY, Tokenomics } from './contracts/Tokenomics'
 
 export type JettonData = {
   name: string
@@ -18,10 +19,12 @@ export type JettonData = {
 
 export class BlumSdk {
   #testnet: boolean
+  #tokenomics: Tokenomics
   #client: TonApiClientWrapper
 
   constructor(tonApiKey?: string, testnet: boolean = false) {
     this.#testnet = testnet
+    this.#tokenomics = new Tokenomics(testnet)
 
     this.#client = new TonApiClientWrapper({
       baseUrl: testnet ? 'https://testnet.tonapi.io' : 'https://tonapi.io',
@@ -98,6 +101,7 @@ export class BlumSdk {
     adminAddress: Address,
     jettonData: JettonData,
     buyAmount: bigint,
+    minReceive: bigint,
     queryId: number = 0,
   ) {
     const contract = this.#memeJettonMinterContractFromConfig(adminAddress, jettonData)
@@ -105,12 +109,12 @@ export class BlumSdk {
     if (buyAmount == 0n) {
       await contract.sendDeploy(sender)
     } else {
-      await contract.sendBuy(sender, buyAmount, queryId)
+      await contract.sendBuy(sender, buyAmount, minReceive, queryId)
     }
   }
 
-  async sendBuy(sender: Sender, jettonAddress: Address, amount: bigint, queryId: number = 0) {
-    await this.#memeJettonMinterContractFromAddress(jettonAddress).sendBuy(sender, amount, queryId)
+  async sendBuy(sender: Sender, jettonAddress: Address, amount: bigint, minReceive: bigint, queryId: number = 0) {
+    await this.#memeJettonMinterContractFromAddress(jettonAddress).sendBuy(sender, amount, minReceive, queryId)
   }
 
   async sendSell(
@@ -170,6 +174,38 @@ export class BlumSdk {
     )
   }
 
+  getThresholdTons(): bigint {
+    return this.#tokenomics.thresholdTons
+  }
+
+  getTonSupply(totalSupply: bigint): bigint {
+    return this.#tokenomics.tonSupply(totalSupply)
+  }
+
+  getMaxSupply(): bigint {
+    return MAX_SUPPLY
+  }
+
+  getThresholdSupply(): bigint {
+    return this.#tokenomics.thresholdSupply
+  }
+
+  getPrice(totalSupply: bigint): number {
+    return this.#tokenomics.calculatePrice(totalSupply)
+  }
+
+  getMarketCap(totalSupply: bigint): number {
+    return this.#tokenomics.calculateMarketCap(totalSupply)
+  }
+
+  getBuyAmount(totalSupply: bigint, tonAmount: bigint): bigint {
+    return this.#tokenomics.calculateBuyAmount(totalSupply, tonAmount)
+  }
+
+  getSellAmount(totalSupply: bigint, jettonAmount: bigint): bigint {
+    return this.#tokenomics.calculateSellAmount(totalSupply, jettonAmount)
+  }
+
   getJettonAddress(adminAddress: Address, jettonData: JettonData): Address {
     const contract = this.#memeJettonMinterContractFromConfig(adminAddress, jettonData)
     return contract.address
@@ -194,15 +230,22 @@ export class BlumSdk {
     adminAddress: Address,
     jettonData: JettonData,
     buyAmount: bigint,
+    minReceive: bigint,
+    queryId: number = 0,
   ): Promise<SendTransactionRequest> {
     return this.#request((sender: Sender) => {
-      return this.sendCreateJetton(sender, adminAddress, jettonData, buyAmount)
+      return this.sendCreateJetton(sender, adminAddress, jettonData, buyAmount, minReceive, queryId)
     })
   }
 
-  async getBuyRequest(jettonAddress: Address, amount: bigint): Promise<SendTransactionRequest> {
+  async getBuyRequest(
+    jettonAddress: Address,
+    amount: bigint,
+    minReceive: bigint,
+    queryId: number = 0,
+  ): Promise<SendTransactionRequest> {
     return this.#request((sender: Sender) => {
-      return this.sendBuy(sender, jettonAddress, amount)
+      return this.sendBuy(sender, jettonAddress, amount, minReceive, queryId)
     })
   }
 
@@ -210,9 +253,10 @@ export class BlumSdk {
     jettonWalletAddress: Address,
     userAddress: Address,
     amount: bigint,
+    queryId: number = 0,
   ): Promise<SendTransactionRequest> {
     return this.#request((sender: Sender) => {
-      return this.sendSell(sender, jettonWalletAddress, userAddress, amount)
+      return this.sendSell(sender, jettonWalletAddress, userAddress, amount, queryId)
     })
   }
 }

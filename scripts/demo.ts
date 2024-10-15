@@ -83,8 +83,16 @@ async function main() {
   if (!(await client.isContractDeployed(jettonAddress))) {
     console.log('MemeJettonMinter contract is not deployed. Deploying...')
 
+    const expectedJettonAmount = sdk.getBuyAmount(0n, INITIAL_BUY_AMOUNT)
+
     const seqNo = await buyerWalletContract.getSeqno()
-    await sdk.sendCreateJetton(buyerSender, adminWallet.address, MEME_JETTON_DATA, INITIAL_BUY_AMOUNT)
+    await sdk.sendCreateJetton(
+      buyerSender,
+      adminWallet.address,
+      MEME_JETTON_DATA,
+      INITIAL_BUY_AMOUNT,
+      expectedJettonAmount,
+    )
     await confirmTransaction(seqNo, buyerWalletContract)
 
     console.log(
@@ -98,8 +106,10 @@ async function main() {
 
   // Buy meme jettons by User
 
+  const expectedJettonAmount = sdk.getBuyAmount(await sdk.getTotalSupply(jettonAddress), BUY_AMOUNT)
+
   const seqNo = await buyerWalletContract.getSeqno()
-  await sdk.sendBuy(buyerSender, jettonAddress, BUY_AMOUNT)
+  await sdk.sendBuy(buyerSender, jettonAddress, BUY_AMOUNT, expectedJettonAmount)
   await confirmTransaction(seqNo, buyerWalletContract)
 
   console.log('Buyer tried to buy ' + fromNano(BUY_AMOUNT) + ' meme tokens')
