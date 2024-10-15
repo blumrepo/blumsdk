@@ -18,7 +18,7 @@ export class TonApiClientWrapper {
   }
 
   async isContractDeployed(address: Address): Promise<boolean> {
-    let account = await this.api.accounts.getAccount(address);
-    return account.status === AccountStatus.Active;
+    let account = await this.api.accounts.getAccount(address)
+    return account.status === AccountStatus.Active
   }
 }

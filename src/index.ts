@@ -9,12 +9,12 @@ import { JettonMinter } from '@ton-community/assets-sdk'
 import { PTON_ADDRESS, PTON_ADDRESS_TESTNET, STON_FI_ROUTER_ADDRESS, STON_FI_ROUTER_ADDRESS_TESTNET } from './constants'
 
 export type JettonData = {
-  name: string,
-  description: string,
-  image: string,
-  symbol: string,
+  name: string
+  description: string
+  image: string
+  symbol: string
   decimals: number
-};
+}
 
 export class BlumSdk {
   #testnet: boolean
@@ -25,7 +25,7 @@ export class BlumSdk {
 
     this.#client = new TonApiClientWrapper({
       baseUrl: testnet ? 'https://testnet.tonapi.io' : 'https://tonapi.io',
-      apiKey: tonApiKey
+      apiKey: tonApiKey,
     })
   }
 
@@ -34,7 +34,7 @@ export class BlumSdk {
     const sender = {
       send: async (_args: SenderArguments) => {
         args = _args
-      }
+      },
     }
 
     await sendCallback(sender)
@@ -47,11 +47,7 @@ export class BlumSdk {
     }
 
     if (args.init) {
-      message.stateInit = beginCell()
-        .store(storeStateInit(args.init))
-        .endCell()
-        .toBoc()
-        .toString('base64')
+      message.stateInit = beginCell().store(storeStateInit(args.init)).endCell().toBoc().toString('base64')
     }
 
     return {
@@ -67,11 +63,14 @@ export class BlumSdk {
   }
 
   #memeJettonMinterContractFromConfig(adminAddress: Address, jettonData: JettonData): OpenedContract<MemeJettonMinter> {
-    const memeJettonMinter = MemeJettonMinter.createFromConfig({
-      admin: adminAddress,
-      content: internalOnchainContentToCell(jettonData),
-      walletCode: getJettonWalletCode(),
-    }, getMemeJettonMinterCode(this.#testnet))
+    const memeJettonMinter = MemeJettonMinter.createFromConfig(
+      {
+        admin: adminAddress,
+        content: internalOnchainContentToCell(jettonData),
+        walletCode: getJettonWalletCode(),
+      },
+      getMemeJettonMinterCode(this.#testnet),
+    )
 
     return this.#client.open(memeJettonMinter)
   }
@@ -82,16 +81,25 @@ export class BlumSdk {
   }
 
   #jettonMinterContractFromConfig(adminAddress: Address, jettonData: JettonData): OpenedContract<JettonMinter> {
-    const jettonMinter = JettonMinter.createFromConfig({
-      admin: adminAddress,
-      content: internalOnchainContentToCell(jettonData),
-      jettonWalletCode: getJettonWalletCode(),
-    }, getJettonMinterCode())
+    const jettonMinter = JettonMinter.createFromConfig(
+      {
+        admin: adminAddress,
+        content: internalOnchainContentToCell(jettonData),
+        jettonWalletCode: getJettonWalletCode(),
+      },
+      getJettonMinterCode(),
+    )
 
     return this.#client.open(jettonMinter)
   }
 
-  async sendCreateJetton(sender: Sender, adminAddress: Address, jettonData: JettonData, buyAmount: bigint, queryId: number = 0) {
+  async sendCreateJetton(
+    sender: Sender,
+    adminAddress: Address,
+    jettonData: JettonData,
+    buyAmount: bigint,
+    queryId: number = 0,
+  ) {
     const contract = this.#memeJettonMinterContractFromConfig(adminAddress, jettonData)
 
     if (buyAmount == 0n) {
@@ -105,32 +113,50 @@ export class BlumSdk {
     await this.#memeJettonMinterContractFromAddress(jettonAddress).sendBuy(sender, amount, queryId)
   }
 
-  async sendSell(sender: Sender, jettonWalletAddress: Address, userAddress: Address, amount: bigint, queryId: number = 0) {
+  async sendSell(
+    sender: Sender,
+    jettonWalletAddress: Address,
+    userAddress: Address,
+    amount: bigint,
+    queryId: number = 0,
+  ) {
     const jettonWallet = JettonWallet.createFromAddress(jettonWalletAddress)
     const contract = this.#client.open(jettonWallet)
     await contract.sendBurn(sender, toNano(0.3), amount, userAddress, null, queryId)
   }
 
-  async sendDeployFinalJetton(sender: Sender, jettonAddress: Address, finalJettonData: JettonData, queryId: number = 0) {
+  async sendDeployFinalJetton(
+    sender: Sender,
+    jettonAddress: Address,
+    finalJettonData: JettonData,
+    queryId: number = 0,
+  ) {
     await this.#memeJettonMinterContractFromAddress(jettonAddress).sendDeployMinter(
       sender,
       toNano(0.01),
       getJettonMinterCode(),
       internalOnchainContentToCell(finalJettonData),
-      queryId
+      queryId,
     )
   }
 
-  async sendDepositLiquidityToStonFi(sender: Sender, jettonAddress: Address, finalJettonData: JettonData, queryId: number = 0) {
+  async sendDepositLiquidityToStonFi(
+    sender: Sender,
+    jettonAddress: Address,
+    finalJettonData: JettonData,
+    queryId: number = 0,
+  ) {
     const routerAddress = Address.parse(this.#testnet ? STON_FI_ROUTER_ADDRESS_TESTNET : STON_FI_ROUTER_ADDRESS)
     const pTonAddress = Address.parse(this.#testnet ? PTON_ADDRESS_TESTNET : PTON_ADDRESS)
 
     const finalJettonAddress = this.getFinalJettonAddress(jettonAddress, finalJettonData)
 
-    const pTonWalletOfRouterAddress = await this.#jettonMinterContractFromAddress(pTonAddress).getWalletAddress(routerAddress)
-    const jettonWalletOfRouterAddress = await this.#jettonMinterContractFromAddress(finalJettonAddress).getWalletAddress(routerAddress)
+    const pTonWalletOfRouterAddress =
+      await this.#jettonMinterContractFromAddress(pTonAddress).getWalletAddress(routerAddress)
+    const jettonWalletOfRouterAddress =
+      await this.#jettonMinterContractFromAddress(finalJettonAddress).getWalletAddress(routerAddress)
 
-    const deadline = Math.floor(Date.now() / 1000) + (15 * 60) // 15 minutes
+    const deadline = Math.floor(Date.now() / 1000) + 15 * 60 // 15 minutes
 
     await this.#memeJettonMinterContractFromAddress(jettonAddress).sendDepositLiquidityToStonFi(
       sender,
@@ -140,7 +166,7 @@ export class BlumSdk {
       jettonWalletOfRouterAddress,
       finalJettonAddress,
       deadline,
-      queryId
+      queryId,
     )
   }
 
@@ -164,7 +190,11 @@ export class BlumSdk {
 
   // Helpers for getting SendTransactionRequest
 
-  async getCreateJettonRequest(adminAddress: Address, jettonData: JettonData, buyAmount: bigint): Promise<SendTransactionRequest> {
+  async getCreateJettonRequest(
+    adminAddress: Address,
+    jettonData: JettonData,
+    buyAmount: bigint,
+  ): Promise<SendTransactionRequest> {
     return this.#request((sender: Sender) => {
       return this.sendCreateJetton(sender, adminAddress, jettonData, buyAmount)
     })
@@ -176,7 +206,11 @@ export class BlumSdk {
     })
   }
 
-  async getSellRequest(jettonWalletAddress: Address, userAddress: Address, amount: bigint): Promise<SendTransactionRequest> {
+  async getSellRequest(
+    jettonWalletAddress: Address,
+    userAddress: Address,
+    amount: bigint,
+  ): Promise<SendTransactionRequest> {
     return this.#request((sender: Sender) => {
       return this.sendSell(sender, jettonWalletAddress, userAddress, amount)
     })
