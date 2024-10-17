@@ -7,7 +7,7 @@
   "unpkg": "dist/index.umd.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "rm -rf dist && microbundle --tsconfig tsconfig.json --no-sourcemap && cp -r src/contracts/sources dist/contracts"
+    "build": "rm -rf dist && microbundle --tsconfig tsconfig.json --no-sourcemap"
   },
   "keywords": [],
   "author": "",

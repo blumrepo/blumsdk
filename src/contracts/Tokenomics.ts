@@ -53,10 +53,6 @@ export class Tokenomics {
     return sqrValue / this.#curveA ** 2n / mult
   }
 
-  #toNano(amount: number | bigint | string) {
-    return Number(amount) * 10 ** 9
-  }
-
   #fromNano(amount: number | bigint | string) {
     return Number(amount) / 10 ** 9
   }
