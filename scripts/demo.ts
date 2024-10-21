@@ -68,7 +68,7 @@ async function main() {
   const jettonWalletAddress = await sdk.getWalletAddress(jettonAddress, buyerWallet.address)
 
   const seqNo2 = await buyerWalletContract.getSeqno()
-  await sdk.sendSell(buyerSender, jettonWalletAddress, buyerWallet.address, SELL_AMOUNT)
+  await sdk.sendSell(buyerSender, jettonWalletAddress, buyerWallet.address, SELL_AMOUNT, 0n)
   await confirmTransaction(seqNo2, buyerWalletContract)
 
   console.log('Buyer tried to sell ' + fromNano(SELL_AMOUNT) + ' meme tokens')

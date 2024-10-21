@@ -5,7 +5,7 @@ import { MemeJettonMinter } from './contracts/MemeJettonMinter'
 import { JettonWallet } from './contracts/JettonWallet'
 import { MAX_SUPPLY, Tokenomics } from './contracts/Tokenomics'
 
-export const BURN_MAX_FEE = toNano(0.1)
+export const BURN_MAX_FEE = toNano(0.05)
 
 export class BlumSdk {
   #testnet: boolean
@@ -60,6 +60,26 @@ export class BlumSdk {
   }
 
   async sendSell(
+    sender: Sender,
+    jettonWalletAddress: Address,
+    userAddress: Address,
+    amount: bigint,
+    minReceive: bigint,
+    queryId: number = 0,
+  ) {
+    const jettonWallet = JettonWallet.createFromAddress(jettonWalletAddress)
+    const contract = this.#client.open(jettonWallet)
+    await contract.sendBurn(
+      sender,
+      BURN_MAX_FEE,
+      amount,
+      userAddress,
+      beginCell().storeCoins(minReceive).endCell(),
+      queryId,
+    )
+  }
+
+  async sendMint(
     sender: Sender,
     jettonWalletAddress: Address,
     userAddress: Address,
@@ -128,10 +148,22 @@ export class BlumSdk {
     jettonWalletAddress: Address,
     userAddress: Address,
     amount: bigint,
+    minReceive: bigint,
     queryId: number = 0,
   ): Promise<SendTransactionRequest> {
     return this.#request((sender: Sender) => {
-      return this.sendSell(sender, jettonWalletAddress, userAddress, amount, queryId)
+      return this.sendSell(sender, jettonWalletAddress, userAddress, amount, minReceive, queryId)
+    })
+  }
+
+  async getMintRequest(
+    jettonWalletAddress: Address,
+    userAddress: Address,
+    amount: bigint,
+    queryId: number = 0,
+  ): Promise<SendTransactionRequest> {
+    return this.#request((sender: Sender) => {
+      return this.sendMint(sender, jettonWalletAddress, userAddress, amount, queryId)
     })
   }
 }
