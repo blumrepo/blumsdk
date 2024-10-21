@@ -5,6 +5,8 @@ import { MemeJettonMinter } from './contracts/MemeJettonMinter'
 import { JettonWallet } from './contracts/JettonWallet'
 import { MAX_SUPPLY, Tokenomics } from './contracts/Tokenomics'
 
+export const BURN_MAX_FEE = toNano(0.1)
+
 export class BlumSdk {
   #testnet: boolean
   #tokenomics: Tokenomics
@@ -66,7 +68,7 @@ export class BlumSdk {
   ) {
     const jettonWallet = JettonWallet.createFromAddress(jettonWalletAddress)
     const contract = this.#client.open(jettonWallet)
-    await contract.sendBurn(sender, toNano(0.3), amount, userAddress, null, queryId)
+    await contract.sendBurn(sender, BURN_MAX_FEE, amount, userAddress, null, queryId)
   }
 
   getThresholdTons(): bigint {

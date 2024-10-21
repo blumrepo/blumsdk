@@ -1,7 +1,9 @@
 import { Address, beginCell, Cell, Contract, ContractProvider, Sender, toNano } from '@ton/core'
 
 const OP_BUY = 5
-const BUY_FEE = toNano('0.12')
+
+export const MAINTENANCE_FEE = toNano(0.05)
+export const BUY_FEE = toNano(0.05)
 
 export class MemeJettonMinter implements Contract {
   constructor(
@@ -43,7 +45,7 @@ export class MemeJettonMinter implements Contract {
 
   async sendBuy(provider: ContractProvider, via: Sender, value: bigint, minReceive: bigint, queryId: number = 0) {
     await provider.internal(via, {
-      value: value + BUY_FEE,
+      value: value + MAINTENANCE_FEE + BUY_FEE,
       body: beginCell().storeUint(OP_BUY, 32).storeUint(queryId, 64).storeCoins(value).storeCoins(minReceive).endCell(),
     })
   }
