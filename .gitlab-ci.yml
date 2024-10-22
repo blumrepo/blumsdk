@@ -1,4 +1,4 @@
-image: node:latest
+image: node:20
 
 stages:
   - deploy
@@ -9,4 +9,4 @@ publish-npm:
     - cp README.md ../
     - echo "@blum-unstoppable/blumsdk:registry=https://${CI_SERVER_HOST}/api/v4/projects/${CI_PROJECT_ID}/packages/npm/" > .npmrc
     - echo "//${CI_SERVER_HOST}/api/v4/projects/${CI_PROJECT_ID}/packages/npm/:_authToken=${CI_JOB_TOKEN}" >> .npmrc
-    - npm publish
+    - npm run build && npm publish
