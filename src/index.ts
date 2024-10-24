@@ -4,6 +4,7 @@ import { TonApiClientWrapper } from './api/ton-client-api-wrapper'
 import { MemeJettonMinter } from './contracts/MemeJettonMinter'
 import { JettonWallet } from './contracts/JettonWallet'
 import { MAX_SUPPLY, Tokenomics } from './contracts/Tokenomics'
+export { MAINTENANCE_FEE, BUY_FEE } from './contracts/MemeJettonMinter'
 
 export const BURN_MAX_FEE = toNano(0.05)
 
