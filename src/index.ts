@@ -4,7 +4,6 @@ import { TonApiClientWrapper } from './api/ton-client-api-wrapper'
 import { MemeJettonMinter } from './contracts/MemeJettonMinter'
 import { JettonWallet } from './contracts/JettonWallet'
 import { MAX_SUPPLY, Tokenomics } from './contracts/Tokenomics'
-export { MAINTENANCE_FEE, BUY_FEE } from './contracts/MemeJettonMinter'
 
 export const BURN_MAX_FEE = toNano(0.05)
 
@@ -80,18 +79,6 @@ export class BlumSdk {
     )
   }
 
-  async sendMint(
-    sender: Sender,
-    jettonWalletAddress: Address,
-    userAddress: Address,
-    amount: bigint,
-    queryId: number = 0,
-  ) {
-    const jettonWallet = JettonWallet.createFromAddress(jettonWalletAddress)
-    const contract = this.#client.open(jettonWallet)
-    await contract.sendBurn(sender, BURN_MAX_FEE, amount, userAddress, null, queryId)
-  }
-
   getThresholdTons(): bigint {
     return this.#tokenomics.thresholdTons
   }
@@ -154,17 +141,6 @@ export class BlumSdk {
   ): Promise<SendTransactionRequest> {
     return this.#request((sender: Sender) => {
       return this.sendSell(sender, jettonWalletAddress, userAddress, amount, minReceive, queryId)
-    })
-  }
-
-  async getMintRequest(
-    jettonWalletAddress: Address,
-    userAddress: Address,
-    amount: bigint,
-    queryId: number = 0,
-  ): Promise<SendTransactionRequest> {
-    return this.#request((sender: Sender) => {
-      return this.sendMint(sender, jettonWalletAddress, userAddress, amount, queryId)
     })
   }
 }

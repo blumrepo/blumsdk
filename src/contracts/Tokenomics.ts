@@ -1,26 +1,30 @@
 export const MAX_SUPPLY = 1_000_000_000_000_000_000n
-export const BUY_FEE_PERCENT = 1n
-export const SELL_FEE_PERCENT = 1n
+export const BUY_FEE_BASIS = 100n
+export const SELL_FEE_BASIS = 100n
 
 const PRECISION = 9n
 
 const THRESHOLD_TONS: bigint = 1_833_000_000_000n
 const THRESHOLD_SUPPLY = 799_999_999_998_688_507n
 const CURVE_A = 590_892_876_676n
+const LIQUIDITY_FEE: bigint = 50_000_000_000n
 
-const THRESHOLD_TONS_TESTNET: bigint = 10_000_000_000n
-const THRESHOLD_SUPPLY_TESTNET = 673_997_717_000_000_000n
-const CURVE_A_TESTNET = 6_739_977_170_000n
+const THRESHOLD_TONS_TESTNET: bigint = 2_500_000_000n
+const THRESHOLD_SUPPLY_TESTNET = 800_000_000_000_000_000n
+const CURVE_A_TESTNET = 16_000_000_000_000n
+const LIQUIDITY_FEE_TESTNET: bigint = 500_000_000n
 
 export class Tokenomics {
   thresholdTons: bigint
   thresholdSupply: bigint
   #curveA: bigint
+  liquidityFee: bigint
 
   constructor(testnet: boolean = false) {
     this.thresholdTons = testnet ? THRESHOLD_TONS_TESTNET : THRESHOLD_TONS
     this.thresholdSupply = testnet ? THRESHOLD_SUPPLY_TESTNET : THRESHOLD_SUPPLY
     this.#curveA = testnet ? CURVE_A_TESTNET : CURVE_A
+    this.liquidityFee = testnet ? LIQUIDITY_FEE_TESTNET : LIQUIDITY_FEE
   }
 
   #sqrt(n: bigint): bigint {
@@ -71,7 +75,7 @@ export class Tokenomics {
   }
 
   calculateBuyAmount(totalSupply: bigint, tonAmount: bigint) {
-    const amount = tonAmount - (tonAmount * BUY_FEE_PERCENT) / 100n
+    const amount = tonAmount - (tonAmount / BUY_FEE_BASIS)
 
     const jettonAmount = this.calculateJettonAmount(totalSupply, amount)
 
@@ -84,7 +88,7 @@ export class Tokenomics {
 
   calculateSellAmount(totalSupply: bigint, jettonAmount: bigint) {
     const tonAmount = this.calculateTonAmount(totalSupply, jettonAmount)
-    return tonAmount - (tonAmount * SELL_FEE_PERCENT) / 100n
+    return tonAmount - (tonAmount / SELL_FEE_BASIS)
   }
 
   calculatePrice(totalSupply: bigint) {
