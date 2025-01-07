@@ -1,31 +1,8 @@
 {
-  "name": "@blum-unstoppable/blumsdk",
-  "version": "2.0.0",
-  "description": "",
-  "main": "dist/index.js",
-  "module": "dist/index.modern.mjs",
-  "unpkg": "dist/index.umd.js",
-  "types": "dist/index.d.ts",
-  "scripts": {
-    "build": "rm -rf dist && microbundle --tsconfig tsconfig.json --no-sourcemap"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "devDependencies": {
-    "@babel/plugin-syntax-bigint": "^7.8.3",
-    "@babel/preset-env": "^7.25.9",
-    "microbundle": "^0.15.1",
-    "prettier": "^3.3.3"
-  },
-  "dependencies": {
-    "@ton-api/client": "^0.1.1",
-    "@ton-api/ton-adapter": "^0.1.0",
-    "@ton-community/assets-sdk": "^0.0.5",
-    "@ton/core": "^0.59.0",
-    "@ton/crypto": "^3.3.0",
-    "@ton/ton": "^15.1.0",
-    "@tonconnect/sdk": "^3.0.5",
-    "isomorphic-unfetch": "^4.0.2"
-  }
+  "name": "blum-unstoppable",
+  "private": true,
+  "workspaces": [
+    "ton",
+    "solana"
+  ]
 }

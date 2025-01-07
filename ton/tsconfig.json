@@ -11,6 +11,14 @@
     "baseUrl": "./",
     "incremental": true
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "test", "lib", "**/*spec.ts"]
+  "include": [
+    "src/**/*",
+    "scripts"
+  ],
+  "exclude": [
+    "node_modules",
+    "test",
+    "lib",
+    "**/*spec.ts"
+  ]
 }
