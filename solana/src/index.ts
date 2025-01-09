@@ -28,18 +28,26 @@ export class BlumSolSdk {
       .instruction()
   }
 
-  async buyInstruction(mintAddress: PublicKey, amount: bigint, maxSolCost: bigint): Promise<TransactionInstruction> {
+  async buyInstruction(
+    mintAddress: PublicKey,
+    solAmount: bigint,
+    minTokenReceive: bigint,
+  ): Promise<TransactionInstruction> {
     return await this.#program.methods
-      .buy(toBN(amount), toBN(maxSolCost))
+      .buy(toBN(solAmount), toBN(minTokenReceive))
       .accounts({
         mintAccount: mintAddress,
       })
       .instruction()
   }
 
-  async sellInstruction(mintAddress: PublicKey, amount: bigint, minSolCost: bigint): Promise<TransactionInstruction> {
+  async sellInstruction(
+    mintAddress: PublicKey,
+    tokenAmount: bigint,
+    minSolReceive: bigint,
+  ): Promise<TransactionInstruction> {
     return await this.#program.methods
-      .sell(toBN(amount), toBN(minSolCost))
+      .sell(toBN(tokenAmount), toBN(minSolReceive))
       .accounts({
         mintAccount: mintAddress,
       })

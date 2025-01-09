@@ -5,7 +5,7 @@
  * IDL can be found at `target/idl/meme_pad.json`.
  */
 export type MemePad = {
-  "address": "3ZEqFj8xa6ZG67et6ve5prKDymp2Po6im6B2HeRv5Zee",
+  "address": "BTFaLWyZJdfvPaggSR2DpGWvaTDEXqM58NjpN4eApkns",
   "metadata": {
     "name": "memePad",
     "version": "0.1.0",
@@ -292,11 +292,11 @@ export type MemePad = {
       ],
       "args": [
         {
-          "name": "amount",
+          "name": "solAmount",
           "type": "u64"
         },
         {
-          "name": "maxSolCost",
+          "name": "minTokenReceive",
           "type": "u64"
         }
       ]
@@ -950,11 +950,11 @@ export type MemePad = {
       ],
       "args": [
         {
-          "name": "amount",
+          "name": "tokenAmount",
           "type": "u64"
         },
         {
-          "name": "minSolCost",
+          "name": "minSolReceive",
           "type": "u64"
         }
       ]
@@ -1283,18 +1283,28 @@ export type MemePad = {
   "errors": [
     {
       "code": 6000,
-      "name": "moreThanMaxSolCost",
-      "msg": "Calculated sol cost is more than max sol cost"
+      "name": "zeroSolAmount",
+      "msg": "Zero sol amount is not allowed for trade"
     },
     {
       "code": 6001,
-      "name": "lessThanMinSolCost",
-      "msg": "Calculated sol cost is less than min sol cost"
+      "name": "lessThanMinTokenReceive",
+      "msg": "Calculated token amount is less than min token receive"
     },
     {
       "code": 6002,
+      "name": "lessThanMinSolReceive",
+      "msg": "Calculated sol amount is less than min sol receive"
+    },
+    {
+      "code": 6003,
+      "name": "bondingCurveIsComplete",
+      "msg": "Trade is not allowed after bonding curve is complete"
+    },
+    {
+      "code": 6004,
       "name": "bondingCurveNotComplete",
-      "msg": "Withdraw not allowed before threshold reached"
+      "msg": "Withdraw not allowed before bonding curve is complete"
     }
   ],
   "types": [
