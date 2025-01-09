@@ -98,8 +98,6 @@ async function main() {
   await buy(buyerSdk, buyerProvider, buyerKeypair, mintKeypair.publicKey, 5n * BigInt(LAMPORTS_PER_SOL))
   await buy(buyerSdk, buyerProvider, buyerKeypair, mintKeypair.publicKey, 100n * BigInt(LAMPORTS_PER_SOL))
 
-  return
-
   // Sell
 
   const circulatingSupply = await buyerSdk.getCirculatingSupply(mintKeypair.publicKey)
