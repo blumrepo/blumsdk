@@ -103,12 +103,12 @@ export class BlumSdk {
     return this.#tokenomics.calculateMarketCap(totalSupply)
   }
 
-  getBuyAmount(totalSupply: bigint, tonAmount: bigint): bigint {
-    return this.#tokenomics.calculateBuyAmount(totalSupply, tonAmount)
+  getBuyAmount(totalSupply: bigint, tonAmount: bigint, feeBasis: bigint): bigint {
+    return this.#tokenomics.calculateBuyAmount(totalSupply, tonAmount, feeBasis)
   }
 
-  getSellAmount(totalSupply: bigint, jettonAmount: bigint): bigint {
-    return this.#tokenomics.calculateSellAmount(totalSupply, jettonAmount)
+  getSellAmount(totalSupply: bigint, jettonAmount: bigint, feeBasis: bigint): bigint {
+    return this.#tokenomics.calculateSellAmount(totalSupply, jettonAmount, feeBasis)
   }
 
   async getWalletAddress(jettonAddress: Address, userAddress: Address): Promise<Address> {
