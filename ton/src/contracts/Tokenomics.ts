@@ -6,19 +6,19 @@ const THRESHOLD_TONS: bigint = 1_833_000_000_000n
 const THRESHOLD_SUPPLY = 799_999_999_998_688_507n
 const CURVE_A = 590_892_876_676n
 
-const THRESHOLD_TONS_TESTNET: bigint = 2_500_000_000n
-const THRESHOLD_SUPPLY_TESTNET = 800_000_000_000_000_000n
-const CURVE_A_TESTNET = 16_000_000_000_000n
+const THRESHOLD_TONS_TEST: bigint = 2_500_000_000n
+const THRESHOLD_SUPPLY_TEST = 800_000_000_000_000_000n
+const CURVE_A_TEST = 16_000_000_000_000n
 
 export class Tokenomics {
   thresholdTons: bigint
   thresholdSupply: bigint
   #curveA: bigint
 
-  constructor(testnet: boolean = false) {
-    this.thresholdTons = testnet ? THRESHOLD_TONS_TESTNET : THRESHOLD_TONS
-    this.thresholdSupply = testnet ? THRESHOLD_SUPPLY_TESTNET : THRESHOLD_SUPPLY
-    this.#curveA = testnet ? CURVE_A_TESTNET : CURVE_A
+  constructor(testCurve: boolean = false) {
+    this.thresholdTons = testCurve ? THRESHOLD_TONS_TEST : THRESHOLD_TONS
+    this.thresholdSupply = testCurve ? THRESHOLD_SUPPLY_TEST : THRESHOLD_SUPPLY
+    this.#curveA = testCurve ? CURVE_A_TEST : CURVE_A
   }
 
   #sqrt(n: bigint): bigint {

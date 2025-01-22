@@ -12,9 +12,9 @@ export class BlumSdk {
   #tokenomics: Tokenomics
   #client: TonApiClientWrapper
 
-  constructor(tonApiKey?: string, testnet: boolean = false) {
+  constructor(tonApiKey?: string, testnet: boolean = false, testCurve: boolean = false) {
     this.#testnet = testnet
-    this.#tokenomics = new Tokenomics(testnet)
+    this.#tokenomics = new Tokenomics(testCurve)
 
     this.#client = new TonApiClientWrapper({
       baseUrl: testnet ? 'https://testnet.tonapi.io' : 'https://tonapi.io',
