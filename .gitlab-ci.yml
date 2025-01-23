@@ -6,8 +6,8 @@ stages:
 publish-npm:
   stage: deploy
   script:
-    - cd ton
     - cp README.md ../
+    - cd ton
     - echo "@blum-unstoppable:registry=https://${CI_SERVER_HOST}/api/v4/projects/${CI_PROJECT_ID}/packages/npm/" > .npmrc
     - echo "//${CI_SERVER_HOST}/api/v4/projects/${CI_PROJECT_ID}/packages/npm/:_authToken=${CI_JOB_TOKEN}" >> .npmrc
     - npm install && npm run build && npm publish
