@@ -17,6 +17,8 @@ export type JettonData = {
   [key: string]: string | number
 }
 
+
+
 export class BlumSdk {
   #testnet: boolean
   #tokenomics: Tokenomics
@@ -184,3 +186,5 @@ export class BlumSdk {
     })
   }
 }
+
+export { DexType, Fee }
