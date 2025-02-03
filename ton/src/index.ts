@@ -1,11 +1,21 @@
-import { Address, beginCell, OpenedContract, Sender, SenderArguments, storeStateInit, toNano } from '@ton/core'
+import { Address, beginCell, OpenedContract, Sender, SenderArguments, storeStateInit } from '@ton/core'
 import { CHAIN, SendTransactionRequest } from '@tonconnect/sdk'
 import { TonApiClientWrapper } from './api/ton-client-api-wrapper'
 import { MemeJettonMinter } from './contracts/MemeJettonMinter'
 import { JettonWallet } from './contracts/JettonWallet'
 import { MAX_SUPPLY, Tokenomics } from './contracts/Tokenomics'
+import { DexType, Factory } from './contracts/Factory'
+import { Fee } from './contracts/JettonConstants'
+import { internalOnchainContentToCell } from '@ton-community/assets-sdk/dist/utils'
 
-export const BURN_MAX_FEE = toNano(0.05)
+export type JettonData = {
+  name: string
+  description: string
+  image: string
+  symbol: string
+  decimals: number
+  [key: string]: string | number
+}
 
 export class BlumSdk {
   #testnet: boolean
@@ -55,8 +65,26 @@ export class BlumSdk {
     return this.#client.open(memeJettonMinter)
   }
 
+  async sendDeployJetton(
+    sender: Sender,
+    factoryAddress: Address,
+    dexType: DexType,
+    jettonData: JettonData,
+    initialBuyAmount: bigint,
+    queryId: number = 0,
+  ) {
+    let factory = this.#client.open(Factory.createFromAddress(factoryAddress))
+    let config = await factory.getConfig()
+
+    let value =
+      config.deployFee + Fee.deployGas + (initialBuyAmount == 0n ? Fee.initialGas : initialBuyAmount + Fee.buyGas)
+    let content = internalOnchainContentToCell(jettonData)
+
+    await factory.sendDeployJetton(sender, value, dexType, content, initialBuyAmount, queryId)
+  }
+
   async sendBuy(sender: Sender, jettonAddress: Address, amount: bigint, minReceive: bigint, queryId: number = 0) {
-    await this.#memeJettonMinterContractFromAddress(jettonAddress).sendBuy(sender, amount, minReceive, queryId)
+    await this.#memeJettonMinterContractFromAddress(jettonAddress).sendBuy(sender, amount, minReceive, null, queryId)
   }
 
   async sendSell(
@@ -71,7 +99,7 @@ export class BlumSdk {
     const contract = this.#client.open(jettonWallet)
     await contract.sendBurn(
       sender,
-      BURN_MAX_FEE,
+      Fee.burnGas,
       amount,
       userAddress,
       beginCell().storeCoins(minReceive).endCell(),
@@ -120,6 +148,18 @@ export class BlumSdk {
   }
 
   // Helpers for getting SendTransactionRequest
+
+  async getDeployJettonRequest(
+    factoryAddress: Address,
+    dexType: DexType,
+    jettonData: JettonData,
+    initialBuyAmount: bigint,
+    queryId: number = 0,
+  ): Promise<SendTransactionRequest> {
+    return this.#request((sender: Sender) => {
+      return this.sendDeployJetton(sender, factoryAddress, dexType, jettonData, initialBuyAmount, queryId)
+    })
+  }
 
   async getBuyRequest(
     jettonAddress: Address,

@@ -1,8 +1,11 @@
-import { Address, beginCell, Cell, Contract, ContractProvider, Sender, toNano } from '@ton/core'
+import { Address, beginCell, Cell, Contract, ContractProvider, Sender } from '@ton/core'
 
-const OP_BUY = 0x2ce5eed2
+import { Fee } from './JettonConstants'
+import { Maybe } from '@ton/core/dist/utils/maybe'
 
-export const BUY_MAINTENANCE_FEE = toNano(0.08)
+class Op {
+  static buy = 0xaf750d34
+}
 
 export class MemeJettonMinter implements Contract {
   constructor(
@@ -42,10 +45,22 @@ export class MemeJettonMinter implements Contract {
     return res.totalSupply
   }
 
-  async sendBuy(provider: ContractProvider, via: Sender, value: bigint, minReceive: bigint, queryId: number = 0) {
+  async sendBuy(
+    provider: ContractProvider,
+    via: Sender,
+    value: bigint,
+    minReceive: bigint,
+    destination: Maybe<Address> = null,
+    queryId: number = 0,
+  ) {
     await provider.internal(via, {
-      value: value + BUY_MAINTENANCE_FEE,
-      body: beginCell().storeUint(OP_BUY, 32).storeUint(queryId, 64).storeCoins(value).storeCoins(minReceive).endCell(),
+      value: value + Fee.buyGas,
+      body: beginCell()
+        .storeUint(Op.buy, 32)
+        .storeUint(queryId, 64)
+        .storeCoins(minReceive)
+        .storeAddress(destination)
+        .endCell(),
     })
   }
 }
