@@ -22,13 +22,13 @@ export type JettonData = {
 export class BlumSdk {
   #testnet: boolean
   #tokenomics: Tokenomics
-  #client: TonApiClientWrapper
+  client: TonApiClientWrapper
 
   constructor(tonApiKey?: string, testnet: boolean = false, testCurve: boolean = false) {
     this.#testnet = testnet
     this.#tokenomics = new Tokenomics(testCurve)
 
-    this.#client = new TonApiClientWrapper({
+    this.client = new TonApiClientWrapper({
       baseUrl: testnet ? 'https://testnet.tonapi.io' : 'https://tonapi.io',
       apiKey: tonApiKey,
     })
@@ -64,7 +64,7 @@ export class BlumSdk {
 
   #memeJettonMinterContractFromAddress(address: Address): OpenedContract<MemeJettonMinter> {
     const memeJettonMinter = MemeJettonMinter.createFromAddress(address)
-    return this.#client.open(memeJettonMinter)
+    return this.client.open(memeJettonMinter)
   }
 
   async sendDeployJetton(
@@ -75,7 +75,7 @@ export class BlumSdk {
     initialBuyAmount: bigint,
     queryId: number = 0,
   ) {
-    let factory = this.#client.open(Factory.createFromAddress(factoryAddress))
+    let factory = this.client.open(Factory.createFromAddress(factoryAddress))
     let config = await factory.getConfig()
 
     let value =
@@ -98,7 +98,8 @@ export class BlumSdk {
     queryId: number = 0,
   ) {
     const jettonWallet = JettonWallet.createFromAddress(jettonWalletAddress)
-    const contract = this.#client.open(jettonWallet)
+    const contract = this.client.open(jettonWallet)
+
     await contract.sendBurn(
       sender,
       Fee.burnGas,
