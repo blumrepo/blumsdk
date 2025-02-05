@@ -9,11 +9,11 @@
     "sourceMap": false,
     "outDir": "./dist",
     "baseUrl": "./",
-    "incremental": true
+    "incremental": true,
+    "rootDir": "./src"
   },
   "include": [
     "src/**/*",
-    "scripts"
   ],
   "exclude": [
     "node_modules",

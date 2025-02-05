@@ -22,7 +22,7 @@ const BUY_AMOUNT = toNano(0.5)
 const SELL_AMOUNT = toNano(100_000)
 
 async function main() {
-  const sdk = new BlumSdk(null, TESTNET, TEST_CURVE)
+  const sdk = new BlumSdk(undefined, TESTNET, TEST_CURVE)
 
   const userKeyPair = await mnemonicToWalletKey(USER_MNEMONIC.split(' '))
   const userWallet = WalletContractV4.create({ publicKey: userKeyPair.publicKey, workchain: 0 })
