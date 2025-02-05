@@ -201,4 +201,4 @@ export class BlumSdk {
   }
 }
 
-export { DexType, Fee }
+export { DexType, Fee, Minter }
