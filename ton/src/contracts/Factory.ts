@@ -1,6 +1,6 @@
 import { Address, beginCell, Cell, Contract, contractAddress, ContractProvider, Sender, toNano } from '@ton/core'
 
-import { Fee } from './JettonConstants'
+import { Fee } from './Fee'
 
 class Op {
   static setAdmin = 0x4d5f2cca

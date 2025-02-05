@@ -1,9 +1,8 @@
 import { mnemonicToWalletKey } from '@ton/crypto'
 import { WalletContractV4 } from '@ton/ton'
 import { Address, toNano } from '@ton/core'
-import { BlumSdk, JettonData } from '../src'
-import { DexType } from '../src/contracts/Factory'
-import { MemeJettonMinter } from '../src/contracts/MemeJettonMinter'
+import { BlumSdk, DexType, JettonData } from '../src'
+import { Minter } from '../src/contracts/Minter'
 
 const TESTNET = true
 const TEST_CURVE = true
@@ -41,10 +40,14 @@ async function main() {
 
   // Sell
 
-  const minter = sdk.client.open(MemeJettonMinter.createFromAddress(EXISTING_JETTON_ADDRESS))
+  const minter = sdk.client.open(Minter.createFromAddress(EXISTING_JETTON_ADDRESS))
   const jettonWalletAddress = await minter.getWalletAddress(userWallet.address)
 
   await sdk.sendSell(userSender, jettonWalletAddress, userWallet.address, SELL_AMOUNT, 0n)
+
+  // Unlock
+
+  await sdk.sendUnlock(userSender, jettonWalletAddress)
 }
 
 main().catch(console.error)

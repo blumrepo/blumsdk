@@ -1,20 +1,20 @@
 import { Address, beginCell, Cell, Contract, ContractProvider, Sender } from '@ton/core'
 
-import { Fee } from './JettonConstants'
+import { Fee } from './Fee'
 import { Maybe } from '@ton/core/dist/utils/maybe'
 
 class Op {
   static buy = 0xaf750d34
 }
 
-export class MemeJettonMinter implements Contract {
+export class Minter implements Contract {
   constructor(
     readonly address: Address,
     readonly init?: { code: Cell; data: Cell },
   ) {}
 
   static createFromAddress(address: Address) {
-    return new MemeJettonMinter(address)
+    return new Minter(address)
   }
 
   async getWalletAddress(provider: ContractProvider, owner: Address): Promise<Address> {

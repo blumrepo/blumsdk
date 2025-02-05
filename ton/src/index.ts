@@ -1,11 +1,11 @@
 import { Address, beginCell, OpenedContract, Sender, SenderArguments, storeStateInit } from '@ton/core'
 import { CHAIN, SendTransactionRequest } from '@tonconnect/sdk'
 import { TonApiClientWrapper } from './api/ton-client-api-wrapper'
-import { MemeJettonMinter } from './contracts/MemeJettonMinter'
-import { JettonWallet } from './contracts/JettonWallet'
+import { Minter } from './contracts/Minter'
+import { Wallet } from './contracts/Wallet'
 import { MAX_SUPPLY, Tokenomics } from './contracts/Tokenomics'
 import { DexType, Factory } from './contracts/Factory'
-import { Fee } from './contracts/JettonConstants'
+import { Fee } from './contracts/Fee'
 import { internalOnchainContentToCell } from '@ton-community/assets-sdk/dist/utils'
 
 export type JettonData = {
@@ -16,8 +16,6 @@ export type JettonData = {
   decimals: number
   [key: string]: string | number
 }
-
-
 
 export class BlumSdk {
   #testnet: boolean
@@ -62,9 +60,14 @@ export class BlumSdk {
     }
   }
 
-  #memeJettonMinterContractFromAddress(address: Address): OpenedContract<MemeJettonMinter> {
-    const memeJettonMinter = MemeJettonMinter.createFromAddress(address)
-    return this.client.open(memeJettonMinter)
+  #minterContractFromAddress(address: Address): OpenedContract<Minter> {
+    const minter = Minter.createFromAddress(address)
+    return this.client.open(minter)
+  }
+
+  #walletContractFromAddress(address: Address): OpenedContract<Wallet> {
+    const wallet = Wallet.createFromAddress(address)
+    return this.client.open(wallet)
   }
 
   async sendDeployJetton(
@@ -86,7 +89,7 @@ export class BlumSdk {
   }
 
   async sendBuy(sender: Sender, jettonAddress: Address, amount: bigint, minReceive: bigint, queryId: number = 0) {
-    await this.#memeJettonMinterContractFromAddress(jettonAddress).sendBuy(sender, amount, minReceive, null, queryId)
+    await this.#minterContractFromAddress(jettonAddress).sendBuy(sender, amount, minReceive, null, queryId)
   }
 
   async sendSell(
@@ -97,17 +100,17 @@ export class BlumSdk {
     minReceive: bigint,
     queryId: number = 0,
   ) {
-    const jettonWallet = JettonWallet.createFromAddress(jettonWalletAddress)
-    const contract = this.client.open(jettonWallet)
+    const wallet = Wallet.createFromAddress(jettonWalletAddress)
+    const contract = this.client.open(wallet)
 
-    await contract.sendBurn(
-      sender,
-      Fee.burnGas,
-      amount,
-      userAddress,
-      beginCell().storeCoins(minReceive).endCell(),
-      queryId,
-    )
+    await contract.sendSell(sender, Fee.sellGas, amount, minReceive, userAddress, queryId)
+  }
+
+  async sendUnlock(sender: Sender, jettonWalletAddress: Address, queryId: number = 0) {
+    const wallet = Wallet.createFromAddress(jettonWalletAddress)
+    const contract = this.client.open(wallet)
+
+    await contract.sendUnlock(sender, queryId)
   }
 
   getThresholdTons(): bigint {
@@ -143,11 +146,15 @@ export class BlumSdk {
   }
 
   async getWalletAddress(jettonAddress: Address, userAddress: Address): Promise<Address> {
-    return this.#memeJettonMinterContractFromAddress(jettonAddress).getWalletAddress(userAddress)
+    return this.#minterContractFromAddress(jettonAddress).getWalletAddress(userAddress)
   }
 
   async getTotalSupply(jettonAddress: Address): Promise<bigint> {
-    return this.#memeJettonMinterContractFromAddress(jettonAddress).getTotalSupply()
+    return this.#minterContractFromAddress(jettonAddress).getTotalSupply()
+  }
+
+  async getUnlocked(jettonWalletAddress: Address): Promise<boolean> {
+    return this.#walletContractFromAddress(jettonWalletAddress).getUnlocked()
   }
 
   // Helpers for getting SendTransactionRequest
@@ -184,6 +191,12 @@ export class BlumSdk {
   ): Promise<SendTransactionRequest> {
     return this.#request((sender: Sender) => {
       return this.sendSell(sender, jettonWalletAddress, userAddress, amount, minReceive, queryId)
+    })
+  }
+
+  async getUnlockRequest(jettonWalletAddress: Address, queryId: number = 0): Promise<SendTransactionRequest> {
+    return this.#request((sender: Sender) => {
+      return this.sendUnlock(sender, jettonWalletAddress, queryId)
     })
   }
 }
