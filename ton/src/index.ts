@@ -22,7 +22,7 @@ export type JettonData = {
 export class BlumSdk {
   #testnet: boolean
   #tokenomics: Tokenomics
-  client: TonApiClientWrapper
+  public client: TonApiClientWrapper
 
   constructor(tonApiKey?: string, testnet: boolean = false, testCurve: boolean = false) {
     this.#testnet = testnet
