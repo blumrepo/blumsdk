@@ -199,6 +199,16 @@ export class BlumSdk {
       return this.sendUnlock(sender, jettonWalletAddress, queryId)
     })
   }
+
+  async getJettonWalletAddress(jettonAddress: Address, userAddress: Address): Promise<Address> {
+    const minter = this.client.open(Minter.createFromAddress(jettonAddress))
+    return await minter.getWalletAddress(userAddress)
+  }
+
+  async getFactoryConfig(factoryAddress: Address) {
+    let factory = this.client.open(Factory.createFromAddress(factoryAddress))
+    return await factory.getConfig()
+  }
 }
 
-export { DexType, Fee, Minter }
+export { DexType, Fee }
