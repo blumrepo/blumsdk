@@ -1,4 +1,4 @@
-import { Address, beginCell, OpenedContract, Sender, SenderArguments, storeStateInit } from '@ton/core'
+import { Address, beginCell, Cell, OpenedContract, Sender, SenderArguments, storeStateInit } from '@ton/core'
 import { CHAIN, SendTransactionRequest } from '@tonconnect/sdk'
 import { TonApiClientWrapper } from './api/ton-client-api-wrapper'
 import { Minter } from './contracts/Minter'
@@ -7,6 +7,7 @@ import { MAX_SUPPLY, Tokenomics } from './contracts/Tokenomics'
 import { DexType, Factory } from './contracts/Factory'
 import { Fee } from './contracts/Fee'
 import { internalOnchainContentToCell } from '@ton-community/assets-sdk/dist/utils'
+import { Maybe } from '@ton/core/dist/utils/maybe'
 
 export type JettonData = {
   name: string
@@ -76,6 +77,7 @@ export class BlumSdk {
     dexType: DexType,
     jettonData: JettonData,
     initialBuyAmount: bigint,
+    customPayload: Maybe<Cell> = null,
     queryId: number = 0,
   ) {
     let factory = this.client.open(Factory.createFromAddress(factoryAddress))
@@ -85,11 +87,25 @@ export class BlumSdk {
       config.deployFee + Fee.deployGas + (initialBuyAmount == 0n ? Fee.initialGas : initialBuyAmount + Fee.buyGas)
     let content = internalOnchainContentToCell(jettonData)
 
-    await factory.sendDeployJetton(sender, value, dexType, content, initialBuyAmount, queryId)
+    await factory.sendDeployJetton(sender, value, dexType, content, initialBuyAmount, customPayload, queryId)
   }
 
-  async sendBuy(sender: Sender, jettonAddress: Address, amount: bigint, minReceive: bigint, queryId: number = 0) {
-    await this.#minterContractFromAddress(jettonAddress).sendBuy(sender, amount, minReceive, null, queryId)
+  async sendBuy(
+    sender: Sender,
+    jettonAddress: Address,
+    amount: bigint,
+    minReceive: bigint,
+    customPayload: Maybe<Cell> = null,
+    queryId: number = 0,
+  ) {
+    await this.#minterContractFromAddress(jettonAddress).sendBuy(
+      sender,
+      amount,
+      minReceive,
+      null,
+      customPayload,
+      queryId,
+    )
   }
 
   async sendSell(
@@ -98,12 +114,13 @@ export class BlumSdk {
     userAddress: Address,
     amount: bigint,
     minReceive: bigint,
+    customPayload: Maybe<Cell> = null,
     queryId: number = 0,
   ) {
     const wallet = Wallet.createFromAddress(jettonWalletAddress)
     const contract = this.client.open(wallet)
 
-    await contract.sendSell(sender, Fee.sellGas, amount, minReceive, userAddress, queryId)
+    await contract.sendSell(sender, Fee.sellGas, amount, minReceive, userAddress, customPayload, queryId)
   }
 
   async sendUnlock(sender: Sender, jettonWalletAddress: Address, queryId: number = 0) {
@@ -164,10 +181,19 @@ export class BlumSdk {
     dexType: DexType,
     jettonData: JettonData,
     initialBuyAmount: bigint,
+    customPayload: Maybe<Cell> = null,
     queryId: number = 0,
   ): Promise<SendTransactionRequest> {
     return this.#request((sender: Sender) => {
-      return this.sendDeployJetton(sender, factoryAddress, dexType, jettonData, initialBuyAmount, queryId)
+      return this.sendDeployJetton(
+        sender,
+        factoryAddress,
+        dexType,
+        jettonData,
+        initialBuyAmount,
+        customPayload,
+        queryId,
+      )
     })
   }
 
@@ -175,10 +201,11 @@ export class BlumSdk {
     jettonAddress: Address,
     amount: bigint,
     minReceive: bigint,
+    customPayload: Maybe<Cell> = null,
     queryId: number = 0,
   ): Promise<SendTransactionRequest> {
     return this.#request((sender: Sender) => {
-      return this.sendBuy(sender, jettonAddress, amount, minReceive, queryId)
+      return this.sendBuy(sender, jettonAddress, amount, minReceive, customPayload, queryId)
     })
   }
 
@@ -187,10 +214,11 @@ export class BlumSdk {
     userAddress: Address,
     amount: bigint,
     minReceive: bigint,
+    customPayload: Maybe<Cell> = null,
     queryId: number = 0,
   ): Promise<SendTransactionRequest> {
     return this.#request((sender: Sender) => {
-      return this.sendSell(sender, jettonWalletAddress, userAddress, amount, minReceive, queryId)
+      return this.sendSell(sender, jettonWalletAddress, userAddress, amount, minReceive, customPayload, queryId)
     })
   }
 

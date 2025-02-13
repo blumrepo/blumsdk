@@ -51,6 +51,7 @@ export class Minter implements Contract {
     value: bigint,
     minReceive: bigint,
     destination: Maybe<Address> = null,
+    customPayload: Maybe<Cell> = null,
     queryId: number = 0,
   ) {
     await provider.internal(via, {
@@ -60,6 +61,7 @@ export class Minter implements Contract {
         .storeUint(queryId, 64)
         .storeCoins(minReceive)
         .storeAddress(destination)
+        .storeMaybeRef(customPayload)
         .endCell(),
     })
   }

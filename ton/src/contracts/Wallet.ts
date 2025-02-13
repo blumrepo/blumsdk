@@ -1,4 +1,5 @@
 import { Address, beginCell, Cell, Contract, ContractProvider, Sender, SendMode, toNano } from '@ton/core'
+import { Maybe } from '@ton/core/dist/utils/maybe'
 
 class Op {
   static sell = 0x742b36d8
@@ -15,13 +16,20 @@ export class Wallet implements Contract {
     return new Wallet(address)
   }
 
-  static sellMessage(jettonAmount: bigint, minTonAmount: bigint, responseAddress: Address, queryId: number = 0) {
+  static sellMessage(
+    jettonAmount: bigint,
+    minTonAmount: bigint,
+    responseAddress: Address,
+    customPayload: Maybe<Cell> = null,
+    queryId: number = 0,
+  ) {
     return beginCell()
       .storeUint(Op.sell, 32)
       .storeUint(queryId, 64)
       .storeCoins(jettonAmount)
       .storeCoins(minTonAmount)
       .storeAddress(responseAddress)
+      .storeMaybeRef(customPayload)
       .endCell()
   }
 
@@ -45,11 +53,12 @@ export class Wallet implements Contract {
     jettonAmount: bigint,
     minTonAmount: bigint,
     responseAddress: Address,
+    customPayload: Maybe<Cell> = null,
     queryId: number = 0,
   ) {
     await provider.internal(via, {
       sendMode: SendMode.PAY_GAS_SEPARATELY,
-      body: Wallet.sellMessage(jettonAmount, minTonAmount, responseAddress, queryId),
+      body: Wallet.sellMessage(jettonAmount, minTonAmount, responseAddress, customPayload, queryId),
       value: value,
     })
   }
