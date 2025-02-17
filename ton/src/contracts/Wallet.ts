@@ -1,5 +1,6 @@
-import { Address, beginCell, Cell, Contract, ContractProvider, Sender, SendMode, toNano } from '@ton/core'
+import { Address, beginCell, Cell, Contract, ContractProvider, Sender, SendMode } from '@ton/core'
 import { Maybe } from '@ton/core/dist/utils/maybe'
+import { Fee } from './Fee'
 
 class Op {
   static sell = 0x742b36d8
@@ -67,7 +68,7 @@ export class Wallet implements Contract {
     await provider.internal(via, {
       sendMode: SendMode.PAY_GAS_SEPARATELY,
       body: Wallet.unlockMessage(queryId),
-      value: toNano(0.05),
+      value: Fee.unlockGas,
     })
   }
 }
