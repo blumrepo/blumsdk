@@ -111,7 +111,6 @@ export class BlumSdk {
   async sendSell(
     sender: Sender,
     jettonWalletAddress: Address,
-    userAddress: Address,
     amount: bigint,
     minReceive: bigint,
     customPayload: Maybe<Cell> = null,
@@ -120,7 +119,7 @@ export class BlumSdk {
     const wallet = Wallet.createFromAddress(jettonWalletAddress)
     const contract = this.client.open(wallet)
 
-    await contract.sendSell(sender, Fee.sellGas, amount, minReceive, userAddress, customPayload, queryId)
+    await contract.sendSell(sender, Fee.sellGas, amount, minReceive, customPayload, queryId)
   }
 
   async sendUnlock(sender: Sender, jettonWalletAddress: Address, queryId: number = 0) {
@@ -211,14 +210,13 @@ export class BlumSdk {
 
   async getSellRequest(
     jettonWalletAddress: Address,
-    userAddress: Address,
     amount: bigint,
     minReceive: bigint,
     customPayload: Maybe<Cell> = null,
     queryId: number = 0,
   ): Promise<SendTransactionRequest> {
     return this.#request((sender: Sender) => {
-      return this.sendSell(sender, jettonWalletAddress, userAddress, amount, minReceive, customPayload, queryId)
+      return this.sendSell(sender, jettonWalletAddress, amount, minReceive, customPayload, queryId)
     })
   }
 
