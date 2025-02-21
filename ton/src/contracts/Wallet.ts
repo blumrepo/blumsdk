@@ -20,7 +20,6 @@ export class Wallet implements Contract {
   static sellMessage(
     jettonAmount: bigint,
     minTonAmount: bigint,
-    responseAddress: Address,
     customPayload: Maybe<Cell> = null,
     queryId: number = 0,
   ) {
@@ -29,7 +28,6 @@ export class Wallet implements Contract {
       .storeUint(queryId, 64)
       .storeCoins(jettonAmount)
       .storeCoins(minTonAmount)
-      .storeAddress(responseAddress)
       .storeMaybeRef(customPayload)
       .endCell()
   }
@@ -53,13 +51,12 @@ export class Wallet implements Contract {
     value: bigint,
     jettonAmount: bigint,
     minTonAmount: bigint,
-    responseAddress: Address,
     customPayload: Maybe<Cell> = null,
     queryId: number = 0,
   ) {
     await provider.internal(via, {
       sendMode: SendMode.PAY_GAS_SEPARATELY,
-      body: Wallet.sellMessage(jettonAmount, minTonAmount, responseAddress, customPayload, queryId),
+      body: Wallet.sellMessage(jettonAmount, minTonAmount, customPayload, queryId),
       value: value,
     })
   }
