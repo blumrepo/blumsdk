@@ -8,32 +8,31 @@ import {
 } from '@solana/web3.js'
 import * as bip39 from 'bip39'
 import { AnchorProvider, Wallet } from '@coral-xyz/anchor'
-import { BlumSolSdk } from '../src'
 import {
   createAssociatedTokenAccountIdempotent,
   createAssociatedTokenAccountIdempotentInstruction,
   getAssociatedTokenAddressSync,
 } from '@solana/spl-token'
-import { TOKEN_DECIMALS } from '../src/constants'
+import { BlumSolSdk } from '../dist/src'
+import { CURVE_A, TOKEN_DECIMALS, TOKEN_THRESHOLD } from '../dist/src/constants'
+
+// Configuration
+
+// const ENDPOINT = clusterApiUrl('mainnet-beta')
+// const ENDPOINT = clusterApiUrl('devnet')
+const ENDPOINT = 'http://127.0.0.1:8899'
+
+const CREATOR_MNEMONIC = 'park combine option relief tongue afford prison warm now frog appear agree'
+const BUYER_MNEMONIC = 'volcano assume bacon thumb bleak connect phrase giraffe reward develop kitten next'
+const PARTNER_ADDRESS = new PublicKey('H5mXyZXw1pj8XZfF1kwGHAVAzkEhasxs16YymGwoSaoZ')
+
+const METADATA = {
+  name: 'Solana Gold',
+  symbol: 'GOLDSOL',
+  uri: 'https://raw.githubusercontent.com/solana-developers/program-examples/new-examples/tokens/tokens/.assets/spl-token.json',
+}
 
 async function main() {
-  // Configuration
-
-  // const ENDPOINT = clusterApiUrl('mainnet-beta')
-  // const ENDPOINT = clusterApiUrl('devnet')
-  const ENDPOINT = 'http://127.0.0.1:8899'
-
-  const CREATOR_MNEMONIC = 'park combine option relief tongue afford prison warm now frog appear agree'
-  const BUYER_MNEMONIC = 'volcano assume bacon thumb bleak connect phrase giraffe reward develop kitten next'
-
-  const METADATA = {
-    name: 'Solana Gold',
-    symbol: 'GOLDSOL',
-    uri: 'https://raw.githubusercontent.com/solana-developers/program-examples/new-examples/tokens/tokens/.assets/spl-token.json',
-  }
-
-  // Script body
-
   const creatorKeypair = Keypair.fromSeed(bip39.mnemonicToSeedSync(CREATOR_MNEMONIC).subarray(0, 32))
   console.log('Creator Address:', creatorKeypair.publicKey.toBase58())
 
@@ -53,11 +52,11 @@ async function main() {
 
   const creatorWallet = new Wallet(creatorKeypair)
   const creatorProvider = new AnchorProvider(connection, creatorWallet)
-  const creatorSdk = new BlumSolSdk(creatorProvider)
+  const creatorSdk = new BlumSolSdk(creatorProvider, CURVE_A)
 
   const buyerWallet = new Wallet(buyerKeypair)
   const buyerProvider = new AnchorProvider(connection, buyerWallet)
-  const buyerSdk = new BlumSolSdk(buyerProvider)
+  const buyerSdk = new BlumSolSdk(buyerProvider, CURVE_A)
 
   // Create token and initial buy
 
@@ -78,7 +77,9 @@ async function main() {
     mintKeypair.publicKey,
   )
 
-  const buyIx = await creatorSdk.buyInstruction(mintKeypair.publicKey, 10n * BigInt(LAMPORTS_PER_SOL), 0n)
+  const buyIx = await creatorSdk.buyInstruction(mintKeypair.publicKey, 10n * BigInt(LAMPORTS_PER_SOL), 0n, {
+    partner: PARTNER_ADDRESS,
+  })
 
   const createTokenTx = new Transaction().add(createTokenIx, ataIx, buyIx)
   const createTokenTxSignature = await sendAndConfirmTransaction(
@@ -104,11 +105,13 @@ async function main() {
   console.log('Circulating supply', circulatingSupply)
 
   const tokenAmount = toTokenValue(70_000_000n)
-  const calculatedSolAmount = creatorSdk.getSellSolAmount(circulatingSupply, tokenAmount)
+  const calculatedSolAmount = creatorSdk.getSolAmountForSell(circulatingSupply, tokenAmount)
 
   console.log('Attempting to sell', tokenAmount, 'tokens for', calculatedSolAmount, 'SOL')
 
-  const sellIx = await creatorSdk.sellInstruction(mintKeypair.publicKey, tokenAmount, calculatedSolAmount)
+  const sellIx = await creatorSdk.sellInstruction(mintKeypair.publicKey, tokenAmount, calculatedSolAmount, {
+    partner: PARTNER_ADDRESS,
+  })
   const sellTx = new Transaction().add(sellIx)
   const sellTxSignature = await buyerProvider.sendAndConfirm(sellTx, [creatorKeypair], { commitment: 'confirmed' })
 
@@ -126,11 +129,11 @@ async function buy(
 ) {
   const circulatingSupply = await sdk.getCirculatingSupply(mintAddress)
   console.log('Circulating supply', circulatingSupply)
-  const calculatedTokenAmount = sdk.getBuyTokenAmount(circulatingSupply, solAmount)
+  const calculatedTokenAmount = sdk.getTokenAmountForBuy(circulatingSupply, TOKEN_THRESHOLD, solAmount)
 
   console.log('Attempting to buy', calculatedTokenAmount, 'tokens for', solAmount, 'SOL')
 
-  const buyIx = await sdk.buyInstruction(mintAddress, solAmount, calculatedTokenAmount)
+  const buyIx = await sdk.buyInstruction(mintAddress, solAmount, calculatedTokenAmount, { partner: PARTNER_ADDRESS })
   const buyTx = new Transaction().add(buyIx)
   const buyTxSignature = await provider.sendAndConfirm(buyTx, [userKeypair], { commitment: 'confirmed' })
 

@@ -3,14 +3,17 @@ import { BN, Program, Provider } from '@coral-xyz/anchor'
 import { PublicKey, TransactionInstruction } from '@solana/web3.js'
 import { MemePad } from './contracts/sources/meme_pad'
 import idl from './contracts/sources/meme_pad.json'
-import { CURVE_A } from './constants'
+
+export interface ReferralData {
+  partner: PublicKey
+}
 
 export class BlumSolSdk {
   #tokenomics: Tokenomics
   #program: Program<MemePad>
 
-  constructor(provider: Provider) {
-    this.#tokenomics = new Tokenomics(CURVE_A)
+  constructor(provider: Provider, curveA: bigint) {
+    this.#tokenomics = new Tokenomics(curveA)
     this.#program = new Program(idl as MemePad, provider)
   }
 
@@ -32,10 +35,12 @@ export class BlumSolSdk {
     mintAddress: PublicKey,
     solAmount: bigint,
     minTokenReceive: bigint,
+    referralData: ReferralData,
   ): Promise<TransactionInstruction> {
     return await this.#program.methods
-      .buy(toBN(solAmount), toBN(minTokenReceive))
+      .buy(toBN(solAmount), toBN(minTokenReceive), referralData)
       .accounts({
+        program: this.#program.programId,
         mintAccount: mintAddress,
       })
       .instruction()
@@ -45,10 +50,12 @@ export class BlumSolSdk {
     mintAddress: PublicKey,
     tokenAmount: bigint,
     minSolReceive: bigint,
+    referralData: ReferralData,
   ): Promise<TransactionInstruction> {
     return await this.#program.methods
-      .sell(toBN(tokenAmount), toBN(minSolReceive))
+      .sell(toBN(tokenAmount), toBN(minSolReceive), referralData)
       .accounts({
+        program: this.#program.programId,
         mintAccount: mintAddress,
       })
       .instruction()
@@ -59,12 +66,16 @@ export class BlumSolSdk {
     return fromBN(bondingCurve.tokenThreshold) - fromBN(bondingCurve.reserveToken)
   }
 
-  getBuyTokenAmount(supply: bigint, solAmount: bigint): bigint {
-    return this.#tokenomics.calculateTokenAmount(supply, solAmount)
+  getTokenAmountForBuy(supply: bigint, threshold: bigint, solAmount: bigint): bigint {
+    return this.#tokenomics.calculateTokenAmount(supply, threshold, solAmount)
   }
 
-  getSellSolAmount(supply: bigint, tokenAmount: bigint): bigint {
-    return this.#tokenomics.calculateSolAmount(supply, tokenAmount)
+  getSolAmountForSell(supply: bigint, tokenAmount: bigint): bigint {
+    return this.#tokenomics.calculateSolAmountForSell(supply, tokenAmount)
+  }
+
+  getSolAmountForBuy(supply: bigint, tokenAmount: bigint): bigint {
+    return this.#tokenomics.calculateSolAmountForBuy(supply, tokenAmount)
   }
 
   #getBondingCurveAddress(mintAddress: PublicKey) {

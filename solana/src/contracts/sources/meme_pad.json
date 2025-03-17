@@ -1,5 +1,5 @@
 {
-  "address": "BTFaLWyZJdfvPaggSR2DpGWvaTDEXqM58NjpN4eApkns",
+  "address": "3ZEqFj8xa6ZG67et6ve5prKDymp2Po6im6B2HeRv5Zee",
   "metadata": {
     "name": "meme_pad",
     "version": "0.1.0",
@@ -282,6 +282,38 @@
         {
           "name": "system_program",
           "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "event_authority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  95,
+                  95,
+                  101,
+                  118,
+                  101,
+                  110,
+                  116,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "program"
         }
       ],
       "args": [
@@ -290,8 +322,16 @@
           "type": "u64"
         },
         {
-          "name": "min_token_receive",
+          "name": "min_token_amount",
           "type": "u64"
+        },
+        {
+          "name": "referral_data",
+          "type": {
+            "defined": {
+              "name": "ReferralData"
+            }
+          }
         }
       ]
     },
@@ -337,6 +377,13 @@
               }
             ]
           }
+        },
+        {
+          "name": "fee_recipient",
+          "writable": true,
+          "relations": [
+            "global_config"
+          ]
         },
         {
           "name": "mint_authority",
@@ -648,7 +695,15 @@
           "type": "pubkey"
         },
         {
-          "name": "fee_basis_points",
+          "name": "deploy_fee",
+          "type": "u64"
+        },
+        {
+          "name": "buy_fee_bps",
+          "type": "u8"
+        },
+        {
+          "name": "sell_fee_bps",
           "type": "u8"
         },
         {
@@ -940,6 +995,38 @@
         {
           "name": "system_program",
           "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "event_authority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  95,
+                  95,
+                  101,
+                  118,
+                  101,
+                  110,
+                  116,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "program"
         }
       ],
       "args": [
@@ -948,8 +1035,122 @@
           "type": "u64"
         },
         {
-          "name": "min_sol_receive",
+          "name": "min_sol_amount",
           "type": "u64"
+        },
+        {
+          "name": "referral_data",
+          "type": {
+            "defined": {
+              "name": "ReferralData"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "update_config",
+      "discriminator": [
+        29,
+        158,
+        252,
+        191,
+        10,
+        83,
+        219,
+        99
+      ],
+      "accounts": [
+        {
+          "name": "user",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "global_config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  108,
+                  111,
+                  98,
+                  97,
+                  108,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "authority",
+          "type": {
+            "option": "pubkey"
+          }
+        },
+        {
+          "name": "fee_recipient",
+          "type": {
+            "option": "pubkey"
+          }
+        },
+        {
+          "name": "migration_account",
+          "type": {
+            "option": "pubkey"
+          }
+        },
+        {
+          "name": "deploy_fee",
+          "type": {
+            "option": "u64"
+          }
+        },
+        {
+          "name": "buy_fee_bps",
+          "type": {
+            "option": "u8"
+          }
+        },
+        {
+          "name": "sell_fee_bps",
+          "type": {
+            "option": "u8"
+          }
+        },
+        {
+          "name": "token_supply",
+          "type": {
+            "option": "u64"
+          }
+        },
+        {
+          "name": "token_threshold",
+          "type": {
+            "option": "u64"
+          }
+        },
+        {
+          "name": "curve_a",
+          "type": {
+            "option": "u64"
+          }
         }
       ]
     },
@@ -1274,31 +1475,64 @@
       ]
     }
   ],
+  "events": [
+    {
+      "name": "BuyEvent",
+      "discriminator": [
+        103,
+        244,
+        82,
+        31,
+        44,
+        245,
+        119,
+        119
+      ]
+    },
+    {
+      "name": "SellEvent",
+      "discriminator": [
+        62,
+        47,
+        55,
+        10,
+        165,
+        3,
+        220,
+        42
+      ]
+    }
+  ],
   "errors": [
     {
       "code": 6000,
-      "name": "ZeroSolAmount",
-      "msg": "Zero sol amount is not allowed for trade"
+      "name": "LessThanMinTokenAmount",
+      "msg": "Calculated token amount is less than min token amount"
     },
     {
       "code": 6001,
-      "name": "LessThanMinTokenReceive",
-      "msg": "Calculated token amount is less than min token receive"
+      "name": "LessThanMinSolAmount",
+      "msg": "Calculated sol amount is less than min sol amount"
     },
     {
       "code": 6002,
-      "name": "LessThanMinSolReceive",
-      "msg": "Calculated sol amount is less than min sol receive"
+      "name": "BondingCurveCompleted",
+      "msg": "Trade not allowed after threshold reached"
     },
     {
       "code": 6003,
-      "name": "BondingCurveIsComplete",
-      "msg": "Trade is not allowed after bonding curve is complete"
+      "name": "BondingCurveNotCompleted",
+      "msg": "Withdraw not allowed before threshold reached"
     },
     {
       "code": 6004,
-      "name": "BondingCurveNotComplete",
-      "msg": "Withdraw not allowed before bonding curve is complete"
+      "name": "ZeroAmount",
+      "msg": "Trade not allow for zero amount"
+    },
+    {
+      "code": 6005,
+      "name": "AlreadyWithdrawn",
+      "msg": "Already withdrawn"
     }
   ],
   "types": [
@@ -1327,6 +1561,42 @@
       }
     },
     {
+      "name": "BuyEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "buyer",
+            "type": "pubkey"
+          },
+          {
+            "name": "sol_amount",
+            "type": "u64"
+          },
+          {
+            "name": "token_amount",
+            "type": "u64"
+          },
+          {
+            "name": "reserve_sol",
+            "type": "u64"
+          },
+          {
+            "name": "reserve_token",
+            "type": "u64"
+          },
+          {
+            "name": "referral_data",
+            "type": {
+              "defined": {
+                "name": "ReferralData"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
       "name": "GlobalConfig",
       "type": {
         "kind": "struct",
@@ -1344,7 +1614,15 @@
             "type": "pubkey"
           },
           {
-            "name": "fee_basis_points",
+            "name": "deploy_fee",
+            "type": "u64"
+          },
+          {
+            "name": "buy_fee_bps",
+            "type": "u8"
+          },
+          {
+            "name": "sell_fee_bps",
             "type": "u8"
           },
           {
@@ -1367,6 +1645,54 @@
       "type": {
         "kind": "struct",
         "fields": []
+      }
+    },
+    {
+      "name": "ReferralData",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "partner",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "SellEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "seller",
+            "type": "pubkey"
+          },
+          {
+            "name": "sol_amount",
+            "type": "u64"
+          },
+          {
+            "name": "token_amount",
+            "type": "u64"
+          },
+          {
+            "name": "reserve_sol",
+            "type": "u64"
+          },
+          {
+            "name": "reserve_token",
+            "type": "u64"
+          },
+          {
+            "name": "referral_data",
+            "type": {
+              "defined": {
+                "name": "ReferralData"
+              }
+            }
+          }
+        ]
       }
     }
   ]

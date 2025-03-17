@@ -5,7 +5,7 @@
  * IDL can be found at `target/idl/meme_pad.json`.
  */
 export type MemePad = {
-  "address": "BTFaLWyZJdfvPaggSR2DpGWvaTDEXqM58NjpN4eApkns",
+  "address": "3ZEqFj8xa6ZG67et6ve5prKDymp2Po6im6B2HeRv5Zee",
   "metadata": {
     "name": "memePad",
     "version": "0.1.0",
@@ -288,6 +288,38 @@ export type MemePad = {
         {
           "name": "systemProgram",
           "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "eventAuthority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  95,
+                  95,
+                  101,
+                  118,
+                  101,
+                  110,
+                  116,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "program"
         }
       ],
       "args": [
@@ -296,8 +328,16 @@ export type MemePad = {
           "type": "u64"
         },
         {
-          "name": "minTokenReceive",
+          "name": "minTokenAmount",
           "type": "u64"
+        },
+        {
+          "name": "referralData",
+          "type": {
+            "defined": {
+              "name": "referralData"
+            }
+          }
         }
       ]
     },
@@ -343,6 +383,13 @@ export type MemePad = {
               }
             ]
           }
+        },
+        {
+          "name": "feeRecipient",
+          "writable": true,
+          "relations": [
+            "globalConfig"
+          ]
         },
         {
           "name": "mintAuthority",
@@ -654,7 +701,15 @@ export type MemePad = {
           "type": "pubkey"
         },
         {
-          "name": "feeBasisPoints",
+          "name": "deployFee",
+          "type": "u64"
+        },
+        {
+          "name": "buyFeeBps",
+          "type": "u8"
+        },
+        {
+          "name": "sellFeeBps",
           "type": "u8"
         },
         {
@@ -946,6 +1001,38 @@ export type MemePad = {
         {
           "name": "systemProgram",
           "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "eventAuthority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  95,
+                  95,
+                  101,
+                  118,
+                  101,
+                  110,
+                  116,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "program"
         }
       ],
       "args": [
@@ -954,8 +1041,122 @@ export type MemePad = {
           "type": "u64"
         },
         {
-          "name": "minSolReceive",
+          "name": "minSolAmount",
           "type": "u64"
+        },
+        {
+          "name": "referralData",
+          "type": {
+            "defined": {
+              "name": "referralData"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "updateConfig",
+      "discriminator": [
+        29,
+        158,
+        252,
+        191,
+        10,
+        83,
+        219,
+        99
+      ],
+      "accounts": [
+        {
+          "name": "user",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "globalConfig",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  103,
+                  108,
+                  111,
+                  98,
+                  97,
+                  108,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "authority",
+          "type": {
+            "option": "pubkey"
+          }
+        },
+        {
+          "name": "feeRecipient",
+          "type": {
+            "option": "pubkey"
+          }
+        },
+        {
+          "name": "migrationAccount",
+          "type": {
+            "option": "pubkey"
+          }
+        },
+        {
+          "name": "deployFee",
+          "type": {
+            "option": "u64"
+          }
+        },
+        {
+          "name": "buyFeeBps",
+          "type": {
+            "option": "u8"
+          }
+        },
+        {
+          "name": "sellFeeBps",
+          "type": {
+            "option": "u8"
+          }
+        },
+        {
+          "name": "tokenSupply",
+          "type": {
+            "option": "u64"
+          }
+        },
+        {
+          "name": "tokenThreshold",
+          "type": {
+            "option": "u64"
+          }
+        },
+        {
+          "name": "curveA",
+          "type": {
+            "option": "u64"
+          }
         }
       ]
     },
@@ -1280,31 +1481,64 @@ export type MemePad = {
       ]
     }
   ],
+  "events": [
+    {
+      "name": "buyEvent",
+      "discriminator": [
+        103,
+        244,
+        82,
+        31,
+        44,
+        245,
+        119,
+        119
+      ]
+    },
+    {
+      "name": "sellEvent",
+      "discriminator": [
+        62,
+        47,
+        55,
+        10,
+        165,
+        3,
+        220,
+        42
+      ]
+    }
+  ],
   "errors": [
     {
       "code": 6000,
-      "name": "zeroSolAmount",
-      "msg": "Zero sol amount is not allowed for trade"
+      "name": "lessThanMinTokenAmount",
+      "msg": "Calculated token amount is less than min token amount"
     },
     {
       "code": 6001,
-      "name": "lessThanMinTokenReceive",
-      "msg": "Calculated token amount is less than min token receive"
+      "name": "lessThanMinSolAmount",
+      "msg": "Calculated sol amount is less than min sol amount"
     },
     {
       "code": 6002,
-      "name": "lessThanMinSolReceive",
-      "msg": "Calculated sol amount is less than min sol receive"
+      "name": "bondingCurveCompleted",
+      "msg": "Trade not allowed after threshold reached"
     },
     {
       "code": 6003,
-      "name": "bondingCurveIsComplete",
-      "msg": "Trade is not allowed after bonding curve is complete"
+      "name": "bondingCurveNotCompleted",
+      "msg": "Withdraw not allowed before threshold reached"
     },
     {
       "code": 6004,
-      "name": "bondingCurveNotComplete",
-      "msg": "Withdraw not allowed before bonding curve is complete"
+      "name": "zeroAmount",
+      "msg": "Trade not allow for zero amount"
+    },
+    {
+      "code": 6005,
+      "name": "alreadyWithdrawn",
+      "msg": "Already withdrawn"
     }
   ],
   "types": [
@@ -1333,6 +1567,42 @@ export type MemePad = {
       }
     },
     {
+      "name": "buyEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "buyer",
+            "type": "pubkey"
+          },
+          {
+            "name": "solAmount",
+            "type": "u64"
+          },
+          {
+            "name": "tokenAmount",
+            "type": "u64"
+          },
+          {
+            "name": "reserveSol",
+            "type": "u64"
+          },
+          {
+            "name": "reserveToken",
+            "type": "u64"
+          },
+          {
+            "name": "referralData",
+            "type": {
+              "defined": {
+                "name": "referralData"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
       "name": "globalConfig",
       "type": {
         "kind": "struct",
@@ -1350,7 +1620,15 @@ export type MemePad = {
             "type": "pubkey"
           },
           {
-            "name": "feeBasisPoints",
+            "name": "deployFee",
+            "type": "u64"
+          },
+          {
+            "name": "buyFeeBps",
+            "type": "u8"
+          },
+          {
+            "name": "sellFeeBps",
             "type": "u8"
           },
           {
@@ -1373,6 +1651,54 @@ export type MemePad = {
       "type": {
         "kind": "struct",
         "fields": []
+      }
+    },
+    {
+      "name": "referralData",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "partner",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "sellEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "seller",
+            "type": "pubkey"
+          },
+          {
+            "name": "solAmount",
+            "type": "u64"
+          },
+          {
+            "name": "tokenAmount",
+            "type": "u64"
+          },
+          {
+            "name": "reserveSol",
+            "type": "u64"
+          },
+          {
+            "name": "reserveToken",
+            "type": "u64"
+          },
+          {
+            "name": "referralData",
+            "type": {
+              "defined": {
+                "name": "referralData"
+              }
+            }
+          }
+        ]
       }
     }
   ]
