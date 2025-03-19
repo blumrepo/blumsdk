@@ -235,6 +235,29 @@ export class BlumSdk {
     let factory = this.client.open(Factory.createFromAddress(factoryAddress))
     return await factory.getConfig()
   }
+
+  // DO NOT USE!!!
+  async sendDeployJettonTEST(
+    sender: Sender,
+    factoryAddress: Address,
+    dexType: DexType,
+    jettonData: JettonData,
+    initialBuyAmount: bigint,
+    customPayload: Maybe<Cell> = null,
+    queryId: number = 0,
+    forceDeployFee: bigint
+  ) {
+    let factory = this.client.open(Factory.createFromAddress(factoryAddress))
+    let config = await factory.getConfig()
+
+    const deployFee = forceDeployFee ?? config.deployFee
+
+    let value =
+      deployFee + Fee.deployGas + (initialBuyAmount == 0n ? Fee.initialGas : initialBuyAmount + Fee.buyGas)
+    let content = internalOnchainContentToCell(jettonData)
+
+    await factory.sendDeployJetton(sender, value, dexType, content, initialBuyAmount, customPayload, queryId)
+  }
 }
 
 export { DexType, Fee }
