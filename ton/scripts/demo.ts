@@ -32,7 +32,7 @@ async function main() {
 
   // Deploy new jetton
 
-  await sdk.sendDeployJetton(userSender, FACTORY_ADDRESS, DexType.STONFI, JETTON_DATA, BUY_AMOUNT)
+  await sdk.sendDeployJetton(userSender, FACTORY_ADDRESS, DexType.STONFI, JETTON_DATA, false, BUY_AMOUNT)
 
   // Buy
 
@@ -43,7 +43,7 @@ async function main() {
   const minter = sdk.client.open(Minter.createFromAddress(EXISTING_JETTON_ADDRESS))
   const jettonWalletAddress = await minter.getWalletAddress(userWallet.address)
 
-  await sdk.sendSell(userSender, jettonWalletAddress, userWallet.address, SELL_AMOUNT, 0n)
+  await sdk.sendSell(userSender, jettonWalletAddress, SELL_AMOUNT, 0n)
 
   // Unlock
 

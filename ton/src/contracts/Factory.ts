@@ -27,6 +27,7 @@ export class Factory implements Contract {
     value: bigint,
     dexType: DexType,
     content: Cell,
+    hasAgent: boolean,
     buyAmount: bigint = 0n,
     customPayload: Maybe<Cell> = null,
     queryId: number = 0,
@@ -38,6 +39,7 @@ export class Factory implements Contract {
         .storeUint(queryId, 64)
         .storeUint(dexType, 1)
         .storeRef(content)
+        .storeBit(hasAgent)
         .storeCoins(buyAmount)
         .storeMaybeRef(customPayload)
         .endCell(),
@@ -52,6 +54,7 @@ export class Factory implements Contract {
       jettonAdmin: res.stack.readAddress(),
       feeRecipient: res.stack.readAddress(),
       deployFee: res.stack.readBigNumber(),
+      agentDeployFee: res.stack.readBigNumber(),
       buyFeeBasis: res.stack.readBigNumber(),
       sellFeeBasis: res.stack.readBigNumber(),
       liquidityFee: res.stack.readBigNumber(),

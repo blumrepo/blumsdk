@@ -76,6 +76,7 @@ export class BlumSdk {
     factoryAddress: Address,
     dexType: DexType,
     jettonData: JettonData,
+    hasAgent: boolean,
     initialBuyAmount: bigint,
     customPayload: Maybe<Cell> = null,
     queryId: number = 0,
@@ -87,7 +88,7 @@ export class BlumSdk {
       config.deployFee + Fee.deployGas + (initialBuyAmount == 0n ? Fee.initialGas : initialBuyAmount + Fee.buyGas)
     let content = internalOnchainContentToCell(jettonData)
 
-    await factory.sendDeployJetton(sender, value, dexType, content, initialBuyAmount, customPayload, queryId)
+    await factory.sendDeployJetton(sender, value, dexType, content, hasAgent, initialBuyAmount, customPayload, queryId)
   }
 
   async sendBuy(
@@ -179,6 +180,7 @@ export class BlumSdk {
     factoryAddress: Address,
     dexType: DexType,
     jettonData: JettonData,
+    hasAgent: boolean,
     initialBuyAmount: bigint,
     customPayload: Maybe<Cell> = null,
     queryId: number = 0,
@@ -189,6 +191,7 @@ export class BlumSdk {
         factoryAddress,
         dexType,
         jettonData,
+        hasAgent,
         initialBuyAmount,
         customPayload,
         queryId,
