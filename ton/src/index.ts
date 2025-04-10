@@ -86,6 +86,8 @@ export class BlumSdk {
 
     let value =
       config.deployFee + Fee.deployGas + (initialBuyAmount == 0n ? Fee.initialGas : initialBuyAmount + Fee.buyGas)
+    if (hasAgent) value += config.agentDeployFee
+
     let content = internalOnchainContentToCell(jettonData)
 
     await factory.sendDeployJetton(sender, value, dexType, content, hasAgent, initialBuyAmount, customPayload, queryId)
