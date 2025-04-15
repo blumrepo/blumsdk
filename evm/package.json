@@ -1,0 +1,23 @@
+{
+  "name": "@blum-unstoppable/evm",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "module": "dist/index.modern.mjs",
+  "unpkg": "dist/index.umd.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "rm -rf ./dist && microbundle --tsconfig ./tsconfig.json --no-sourcemap"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "dotenv": "^16.5.0",
+    "microbundle": "^0.15.1",
+    "prettier": "^3.3.3"
+  },
+  "dependencies": {
+    "ethers": "^6.13.5"
+  }
+}
