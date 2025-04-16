@@ -28,6 +28,15 @@ export class BondingCurveTokenSDK {
     return this.address
   }
 
+  createDepositLiquidityTx(): TransactionData {
+    const data = this.interface.encodeFunctionData('depositLiquidity', [])
+
+    return {
+      to: this.address,
+      data
+    }
+  }
+
   /**
    * Create transaction data to buy tokens
    * @param value The ETH value to send
@@ -94,5 +103,26 @@ export class BondingCurveTokenSDK {
     const data = interface_.encodeFunctionData('totalSupply', [])
     const result = await this.provider.call({ to: this.address, data })
     return interface_.decodeFunctionResult('totalSupply', result)[0]
+  }
+
+  async getName(): Promise<string> {
+    const interface_ = new ethers.Interface(bondingCurveTokenAbi)
+    const data = interface_.encodeFunctionData('name', [])
+    const result = await this.provider.call({ to: this.address, data })
+    return interface_.decodeFunctionResult('name', result)[0]
+  }
+
+  async getSymbol(): Promise<string> {
+    const interface_ = new ethers.Interface(bondingCurveTokenAbi)
+    const data = interface_.encodeFunctionData('symbol', [])
+    const result = await this.provider.call({ to: this.address, data })
+    return interface_.decodeFunctionResult('symbol', result)[0]
+  }
+
+  async getPhase(): Promise<number> {
+    const interface_ = new ethers.Interface(bondingCurveTokenAbi)
+    const data = interface_.encodeFunctionData("phase");
+    const result = await this.provider.call({ to: this.address, data });
+    return Number(interface_.decodeFunctionResult("phase", result)[0]);
   }
 }
