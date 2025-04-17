@@ -1,24 +1,15 @@
 export const MAX_SUPPLY = 1_000_000_000_000_000_000n
+export const THRESHOLD_SUPPLY = 800_000_000_000_000_000n
 
 const PRECISION = 9n
 
-const THRESHOLD_TONS: bigint = 1_833_000_000_000n
-const THRESHOLD_SUPPLY = 799_999_999_998_688_507n
-const CURVE_A = 590_892_876_676n
-
-const THRESHOLD_TONS_TEST: bigint = 2_500_000_000n
-const THRESHOLD_SUPPLY_TEST = 800_000_000_000_000_000n
-const CURVE_A_TEST = 16_000_000_000_000n
-
 export class Tokenomics {
-  thresholdTons: bigint
-  thresholdSupply: bigint
-  #curveA: bigint
+  public thresholdTons: bigint
+  public curveA: bigint
 
-  constructor(testCurve: boolean = false) {
-    this.thresholdTons = testCurve ? THRESHOLD_TONS_TEST : THRESHOLD_TONS
-    this.thresholdSupply = testCurve ? THRESHOLD_SUPPLY_TEST : THRESHOLD_SUPPLY
-    this.#curveA = testCurve ? CURVE_A_TEST : CURVE_A
+  constructor(thresholdTons: bigint, curveA: bigint) {
+    this.thresholdTons = thresholdTons
+    this.curveA = curveA
   }
 
   #sqrt(n: bigint): bigint {
@@ -38,7 +29,7 @@ export class Tokenomics {
 
     const mult = 10n ** PRECISION
     const sqrtValue = this.#sqrt(value * mult * mult)
-    return (sqrtValue * this.#curveA) / mult
+    return (sqrtValue * this.curveA) / mult
   }
 
   #fReverse(value: bigint) {
@@ -48,7 +39,7 @@ export class Tokenomics {
 
     const mult = 10n ** PRECISION
     const sqrValue = value ** 2n * mult
-    return sqrValue / this.#curveA ** 2n / mult
+    return sqrValue / this.curveA ** 2n / mult
   }
 
   #fromNano(amount: number | bigint | string) {
@@ -61,7 +52,7 @@ export class Tokenomics {
 
   calculateJettonAmount(totalSupply: bigint, tonAmount: bigint) {
     const supply = this.#fReverse(totalSupply)
-    return this.#f(supply + tonAmount) - this.#f(supply)
+    return this.#f(supply + tonAmount) - totalSupply
   }
 
   calculateTonAmount(totalSupply: bigint, jettonAmount: bigint) {
@@ -73,8 +64,8 @@ export class Tokenomics {
 
     const jettonAmount = this.calculateJettonAmount(totalSupply, amount)
 
-    if (jettonAmount + totalSupply > this.thresholdSupply) {
-      return this.thresholdSupply - totalSupply
+    if (jettonAmount + totalSupply > THRESHOLD_SUPPLY) {
+      return THRESHOLD_SUPPLY - totalSupply
     }
 
     return jettonAmount

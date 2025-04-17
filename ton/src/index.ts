@@ -1,13 +1,19 @@
-import { Address, beginCell, Cell, OpenedContract, Sender, SenderArguments, storeStateInit } from '@ton/core'
+import { Address, beginCell, Cell, OpenedContract, Sender, SenderArguments, storeStateInit, toNano } from '@ton/core'
 import { CHAIN, SendTransactionRequest } from '@tonconnect/sdk'
 import { TonApiClientWrapper } from './api/ton-client-api-wrapper'
 import { Minter } from './contracts/Minter'
 import { Wallet } from './contracts/Wallet'
-import { MAX_SUPPLY, Tokenomics } from './contracts/Tokenomics'
+import { MAX_SUPPLY, THRESHOLD_SUPPLY, Tokenomics } from './contracts/Tokenomics'
 import { DexType, Factory } from './contracts/Factory'
 import { Fee } from './contracts/Fee'
 import { internalOnchainContentToCell } from '@ton-community/assets-sdk/dist/utils'
 import { Maybe } from '@ton/core/dist/utils/maybe'
+
+const CURVE_A = 653197264742n
+const CURVE_TON = 1499997865536n
+
+const CURVE_A_TEST = 16000000000000n
+const CURVE_TON_TEST = toNano(2.5)
 
 export type JettonData = {
   name: string
@@ -25,7 +31,11 @@ export class BlumSdk {
 
   constructor(tonApiKey?: string, testnet: boolean = false, testCurve: boolean = false) {
     this.#testnet = testnet
-    this.#tokenomics = new Tokenomics(testCurve)
+
+    const curveA = testCurve ? CURVE_A_TEST : CURVE_A
+    const curveTon = testCurve ? CURVE_TON_TEST : CURVE_TON
+
+    this.#tokenomics = new Tokenomics(curveTon, curveA)
 
     this.client = new TonApiClientWrapper({
       baseUrl: testnet ? 'https://testnet.tonapi.io' : 'https://tonapi.io',
@@ -145,7 +155,7 @@ export class BlumSdk {
   }
 
   getThresholdSupply(): bigint {
-    return this.#tokenomics.thresholdSupply
+    return THRESHOLD_SUPPLY
   }
 
   getPrice(totalSupply: bigint): number {
