@@ -3,13 +3,22 @@ image: node:20
 stages:
   - deploy
 
-publish-npm:
+publish-npm-ton:
   stage: deploy
   script:
-#    - cp README.md ../
     - echo "@blum-unstoppable:registry=https://${CI_SERVER_HOST}/api/v4/projects/${CI_PROJECT_ID}/packages/npm/" > .npmrc
     - echo "//${CI_SERVER_HOST}/api/v4/projects/${CI_PROJECT_ID}/packages/npm/:_authToken=${CI_JOB_TOKEN}" >> .npmrc
     - cd ton
+    - npm install
+    - npm run build
+    - npm publish --registry=https://${CI_SERVER_HOST}/api/v4/projects/${CI_PROJECT_ID}/packages/npm/
+
+publish-npm-solana:
+  stage: deploy
+  script:
+    - echo "@blum-unstoppable:registry=https://${CI_SERVER_HOST}/api/v4/projects/${CI_PROJECT_ID}/packages/npm/" > .npmrc
+    - echo "//${CI_SERVER_HOST}/api/v4/projects/${CI_PROJECT_ID}/packages/npm/:_authToken=${CI_JOB_TOKEN}" >> .npmrc
+    - cd solana
     - npm install
     - npm run build
     - npm publish --registry=https://${CI_SERVER_HOST}/api/v4/projects/${CI_PROJECT_ID}/packages/npm/
