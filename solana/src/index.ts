@@ -1,4 +1,3 @@
-import { Tokenomics } from './contracts/Tokenomics'
 import { BN, Program, Provider } from '@coral-xyz/anchor'
 import { PublicKey, TransactionInstruction } from '@solana/web3.js'
 import { MemePad } from './contracts/sources/meme_pad'
@@ -9,11 +8,9 @@ export interface ReferralData {
 }
 
 export class BlumSolSdk {
-  #tokenomics: Tokenomics
   #program: Program<MemePad>
 
-  constructor(provider: Provider, curveA: bigint) {
-    this.#tokenomics = new Tokenomics(curveA)
+  constructor(provider: Provider) {
     this.#program = new Program(idl as MemePad, provider)
   }
 
@@ -66,16 +63,9 @@ export class BlumSolSdk {
     return fromBN(bondingCurve.tokenThreshold) - fromBN(bondingCurve.reserveToken)
   }
 
-  getTokenAmountForBuy(supply: bigint, threshold: bigint, solAmount: bigint): bigint {
-    return this.#tokenomics.calculateTokenAmount(supply, threshold, solAmount)
-  }
-
-  getSolAmountForSell(supply: bigint, tokenAmount: bigint): bigint {
-    return this.#tokenomics.calculateSolAmountForSell(supply, tokenAmount)
-  }
-
-  getSolAmountForBuy(supply: bigint, tokenAmount: bigint): bigint {
-    return this.#tokenomics.calculateSolAmountForBuy(supply, tokenAmount)
+  async getCurveA(mintAddress: PublicKey) {
+    let bondingCurve = await this.#program.account.bondingCurve.fetch(this.#getBondingCurveAddress(mintAddress))
+    return fromBN(bondingCurve.curveA)
   }
 
   #getBondingCurveAddress(mintAddress: PublicKey) {
