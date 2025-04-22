@@ -12,6 +12,7 @@ publish-npm-ton:
     - npm install
     - npm run build
     - npm publish --registry=https://${CI_SERVER_HOST}/api/v4/projects/${CI_PROJECT_ID}/packages/npm/
+  when: manual
 
 publish-npm-solana:
   stage: deploy
@@ -22,3 +23,4 @@ publish-npm-solana:
     - npm install
     - npm run build
     - npm publish --registry=https://${CI_SERVER_HOST}/api/v4/projects/${CI_PROJECT_ID}/packages/npm/
+  when: manual
