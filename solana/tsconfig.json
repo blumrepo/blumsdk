@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
+    "module": "esnext",
+    "moduleResolution": "node",
     "declaration": true,
     "removeComments": true,
     "allowSyntheticDefaultImports": true,
@@ -9,13 +10,13 @@
     "outDir": "./dist",
     "baseUrl": "./",
     "incremental": true,
+    "rootDir": "./src",
     "strict": true,
     "esModuleInterop": true,
     "resolveJsonModule": true
   },
   "include": [
-    "src/**/*",
-    "scripts"
+    "src/**/*"
   ],
   "exclude": [
     "node_modules",
