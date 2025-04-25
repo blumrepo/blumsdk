@@ -94,9 +94,9 @@ export class BlumSdk {
     let factory = this.client.open(Factory.createFromAddress(factoryAddress))
     let config = await factory.getConfig()
 
-    let value =
-      config.deployFee + Fee.deployGas + (initialBuyAmount == 0n ? Fee.initialGas : initialBuyAmount + Fee.buyGas)
+    let value = config.deployFee + Fee.deployJettonGas + Fee.initialGas
     if (hasAgent) value += config.agentDeployFee
+    if (initialBuyAmount > 0n) value += initialBuyAmount + Fee.buyGas
 
     let content = internalOnchainContentToCell(jettonData)
 
