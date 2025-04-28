@@ -36,6 +36,15 @@ export class Wallet implements Contract {
     return beginCell().storeUint(Op.unlock, 32).storeUint(queryId, 64).endCell()
   }
 
+  async getJettonBalance(provider: ContractProvider) {
+    let state = await provider.getState()
+    if (state.state.type !== 'active') {
+      return 0n
+    }
+    let res = await provider.get('get_wallet_data', [])
+    return res.stack.readBigNumber()
+  }
+
   async getUnlocked(provider: ContractProvider) {
     let state = await provider.getState()
     if (state.state.type !== 'active') {

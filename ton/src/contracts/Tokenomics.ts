@@ -60,7 +60,8 @@ export class Tokenomics {
   }
 
   calculateBuyAmount(totalSupply: bigint, tonAmount: bigint, feeBasis: bigint) {
-    const amount = (tonAmount * (10_000n - feeBasis)) / 10_000n
+    const fee = tonAmount * feeBasis / 10_000n
+    const amount = tonAmount - fee
 
     const jettonAmount = this.calculateJettonAmount(totalSupply, amount)
 
@@ -73,7 +74,8 @@ export class Tokenomics {
 
   calculateSellAmount(totalSupply: bigint, jettonAmount: bigint, feeBasis: bigint) {
     const tonAmount = this.calculateTonAmount(totalSupply, jettonAmount)
-    return (tonAmount * (10_000n - feeBasis)) / 10_000n
+    const fee = tonAmount * feeBasis / 10_000n
+    return  tonAmount - fee
   }
 
   calculatePrice(totalSupply: bigint) {

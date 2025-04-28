@@ -21,4 +21,9 @@ export class TonApiClientWrapper {
     let account = await this.api.accounts.getAccount(address)
     return account.status === AccountStatus.Active
   }
+
+  async getAccountBalance(address: Address): Promise<bigint> {
+    let account = await this.api.accounts.getAccount(address)
+    return account.balance
+  }
 }

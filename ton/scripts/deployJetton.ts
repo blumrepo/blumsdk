@@ -1,25 +1,25 @@
+import 'dotenv/config'
 import { mnemonicToWalletKey } from '@ton/crypto'
 import { WalletContractV4 } from '@ton/ton'
 import { Address, toNano } from '@ton/core'
 import { BlumSdk, DexType, JettonData } from '../src'
-import { Minter } from '../src/contracts/Minter'
 
 const TESTNET = true
 const TEST_CURVE = true
 
-const USER_MNEMONIC = ''
-const FACTORY_ADDRESS = Address.parse('')
-const EXISTING_JETTON_ADDRESS = Address.parse('')
+const USER_MNEMONIC = process.env.DEPLOYER_MNEMONIC
+const FACTORY_ADDRESS = Address.parse(process.env.FACTORY_ADDRESS)
 
 const JETTON_DATA: JettonData = {
-  name: 'Test Jetton',
+  name: 'Test Jetton 2',
   description: 'Test Jetton description',
   image: 'https://cdn-icons-png.flaticon.com/512/9908/9908191.png',
   symbol: 'TJ',
   decimals: 9,
 }
-const BUY_AMOUNT = toNano(0.5)
-const SELL_AMOUNT = toNano(100_000)
+
+const INITIAL_BUY_AMOUNT = toNano(0.5)
+// const INITIAL_BUY_AMOUNT = 0n
 
 async function main() {
   const sdk = new BlumSdk(undefined, TESTNET, TEST_CURVE)
@@ -30,24 +30,7 @@ async function main() {
 
   console.log('User Address: ' + userWallet.address.toString({ testOnly: TESTNET, bounceable: false }))
 
-  // Deploy new jetton
-
-  await sdk.sendDeployJetton(userSender, FACTORY_ADDRESS, DexType.STONFI, JETTON_DATA, false, BUY_AMOUNT)
-
-  // Buy
-
-  await sdk.sendBuy(userSender, EXISTING_JETTON_ADDRESS, BUY_AMOUNT, 0n)
-
-  // Sell
-
-  const minter = sdk.client.open(Minter.createFromAddress(EXISTING_JETTON_ADDRESS))
-  const jettonWalletAddress = await minter.getWalletAddress(userWallet.address)
-
-  await sdk.sendSell(userSender, jettonWalletAddress, SELL_AMOUNT, 0n)
-
-  // Unlock
-
-  await sdk.sendUnlock(userSender, jettonWalletAddress)
+  await sdk.sendDeployJetton(userSender, FACTORY_ADDRESS, DexType.STONFI, JETTON_DATA, false, INITIAL_BUY_AMOUNT)
 }
 
 main().catch(console.error)
