@@ -5,7 +5,7 @@
  * IDL can be found at `target/idl/meme_pad.json`.
  */
 export type MemePad = {
-  "address": "3ZEqFj8xa6ZG67et6ve5prKDymp2Po6im6B2HeRv5Zee",
+  "address": "CKnzvtXPSkQEd31KiRWw5fKR4HKpvNvFWXTKcApMGfze",
   "metadata": {
     "name": "memePad",
     "version": "0.1.0",
