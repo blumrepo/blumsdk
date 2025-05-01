@@ -2,6 +2,8 @@ import { BN, Program, Provider } from '@coral-xyz/anchor'
 import { PublicKey, TransactionInstruction } from '@solana/web3.js'
 import { MemePad } from './contracts/sources/meme_pad'
 import idl from './contracts/sources/meme_pad.json'
+import { TOKEN_THRESHOLD } from './constants'
+import { Tokenomics } from './contracts/Tokenomics'
 
 export interface ReferralData {
   partner: PublicKey
@@ -68,6 +70,18 @@ export class BlumSolSdk {
     return fromBN(bondingCurve.curveA)
   }
 
+  getTokenAmountForBuy(curveA: bigint, supply: bigint, threshold: bigint, solAmount: bigint): bigint {
+    return new Tokenomics(curveA).calculateTokenAmount(supply, threshold, solAmount)
+  }
+
+  getSolAmountForSell(curveA: bigint, supply: bigint, tokenAmount: bigint): bigint {
+    return new Tokenomics(curveA).calculateSolAmountForSell(supply, tokenAmount)
+  }
+
+  getSolAmountForBuy(curveA: bigint, supply: bigint, tokenAmount: bigint): bigint {
+    return new Tokenomics(curveA).calculateSolAmountForBuy(supply, tokenAmount)
+  }
+
   #getBondingCurveAddress(mintAddress: PublicKey) {
     const [bondingCurveAddress] = PublicKey.findProgramAddressSync(
       [Buffer.from('bonding_curve'), mintAddress.toBuffer()],
@@ -84,4 +98,8 @@ function toBN(value: bigint) {
 
 function fromBN(value: BN) {
   return BigInt(value)
+}
+
+export {
+  TOKEN_THRESHOLD,
 }

@@ -128,8 +128,9 @@ async function buy(
   solAmount: bigint,
 ) {
   const circulatingSupply = await sdk.getCirculatingSupply(mintAddress)
+  const curveA = await sdk.getCurveA(mintAddress)
   console.log('Circulating supply', circulatingSupply)
-  const calculatedTokenAmount = sdk.getTokenAmountForBuy(circulatingSupply, TOKEN_THRESHOLD, solAmount)
+  const calculatedTokenAmount = sdk.getTokenAmountForBuy(curveA, circulatingSupply, TOKEN_THRESHOLD, solAmount)
 
   console.log('Attempting to buy', calculatedTokenAmount, 'tokens for', solAmount, 'SOL')
 
