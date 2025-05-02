@@ -2,9 +2,16 @@ import { Address, beginCell, Cell, Contract, ContractProvider, Sender } from '@t
 
 import { Fee } from './Fee'
 import { Maybe } from '@ton/core/dist/utils/maybe'
+import { DexType } from './Factory'
 
 class Op {
   static buy = 0xaf750d34
+}
+
+export enum Phase {
+  TRADING = 0,
+  PENDING_DEX_LIQUIDITY = 1,
+  LISTED = 2,
 }
 
 export class Minter implements Contract {
@@ -64,5 +71,56 @@ export class Minter implements Contract {
         .storeMaybeRef(customPayload)
         .endCell(),
     })
+  }
+
+  async getBclData(provider: ContractProvider) {
+    const res = await provider.get('get_bcl_data', [])
+
+    const dexType = res.stack.readNumber()
+
+    if (dexType == DexType.STONFI) {
+      return {
+        dexType,
+        totalSupply: res.stack.readBigNumber(),
+        bclSupply: res.stack.readBigNumber(),
+        liqSupply: res.stack.readBigNumber(),
+        factory: res.stack.readAddress(),
+        author: res.stack.readAddress(),
+        content: res.stack.readCell(),
+        feeAddress: res.stack.readAddress(),
+        buyFeeBasis: res.stack.readNumber(),
+        sellFeeBasis: res.stack.readNumber(),
+        lastTradeDate: res.stack.readNumber(),
+        phase: res.stack.readNumber(),
+        tonLiqCollected: res.stack.readBigNumber(),
+        tradingCloseFee: res.stack.readBigNumber(),
+        fullPriceTon: res.stack.readBigNumber(),
+        fullPriceTonFees: res.stack.readBigNumber(),
+        routerAddress: res.stack.readAddress(),
+        routerPtonWalletAddress: res.stack.readAddress(),
+      }
+    } else if (dexType == DexType.DEDUST) {
+      return {
+        dexType,
+        totalSupply: res.stack.readBigNumber(),
+        bclSupply: res.stack.readBigNumber(),
+        liqSupply: res.stack.readBigNumber(),
+        factory: res.stack.readAddress(),
+        admin: res.stack.readAddress(),
+        author: res.stack.readAddress(),
+        content: res.stack.readCell(),
+        feeAddress: res.stack.readAddress(),
+        buyFeeBasis: res.stack.readNumber(),
+        sellFeeBasis: res.stack.readNumber(),
+        lastTradeDate: res.stack.readNumber(),
+        phase: res.stack.readNumber(),
+        tonLiqCollected: res.stack.readBigNumber(),
+        tradingCloseFee: res.stack.readBigNumber(),
+        fullPriceTon: res.stack.readBigNumber(),
+        fullPriceTonFees: res.stack.readBigNumber(),
+      }
+    } else {
+      return {}
+    }
   }
 }

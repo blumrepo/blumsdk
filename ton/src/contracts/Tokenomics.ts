@@ -4,11 +4,9 @@ export const THRESHOLD_SUPPLY = 800_000_000_000_000_000n
 const PRECISION = 9n
 
 export class Tokenomics {
-  public thresholdTons: bigint
   public curveA: bigint
 
-  constructor(thresholdTons: bigint, curveA: bigint) {
-    this.thresholdTons = thresholdTons
+  constructor(curveA: bigint) {
     this.curveA = curveA
   }
 
@@ -40,6 +38,10 @@ export class Tokenomics {
     const mult = 10n ** PRECISION
     const sqrValue = value ** 2n * mult
     return sqrValue / this.curveA ** 2n / mult
+  }
+
+  #toNano(amount: number | bigint | string) {
+    return Number(amount) * 10 ** 9
   }
 
   #fromNano(amount: number | bigint | string) {

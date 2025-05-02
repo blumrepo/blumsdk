@@ -9,11 +9,8 @@ import { Fee } from './contracts/Fee'
 import { internalOnchainContentToCell } from '@ton-community/assets-sdk/dist/utils'
 import { Maybe } from '@ton/core/dist/utils/maybe'
 
-const CURVE_A = 653197264742n
-const CURVE_TON = 1499997865536n
-
-const CURVE_A_TEST = 16000000000000n
-const CURVE_TON_TEST = toNano(2.5)
+const CURVE_A = 653197264742n // 1500 TON
+const CURVE_A_TEST = 16000000000000n // 2.5 TON
 
 export type JettonData = {
   name: string
@@ -33,9 +30,8 @@ export class BlumSdk {
     this.#testnet = testnet
 
     const curveA = testCurve ? CURVE_A_TEST : CURVE_A
-    const curveTon = testCurve ? CURVE_TON_TEST : CURVE_TON
 
-    this.#tokenomics = new Tokenomics(curveTon, curveA)
+    this.#tokenomics = new Tokenomics(curveA)
 
     this.client = new TonApiClientWrapper({
       baseUrl: testnet ? 'https://testnet.tonapi.io' : 'https://tonapi.io',
@@ -143,7 +139,7 @@ export class BlumSdk {
   }
 
   getThresholdTons(): bigint {
-    return this.#tokenomics.thresholdTons
+    return this.#tokenomics.tonSupply(THRESHOLD_SUPPLY)
   }
 
   getTonSupply(totalSupply: bigint): bigint {
@@ -180,6 +176,10 @@ export class BlumSdk {
 
   async getTotalSupply(jettonAddress: Address): Promise<bigint> {
     return this.#minterContractFromAddress(jettonAddress).getTotalSupply()
+  }
+
+  async getBlumBclData(jettonAddress: Address) {
+    return this.#minterContractFromAddress(jettonAddress).getBclData()
   }
 
   async getUnlocked(jettonWalletAddress: Address): Promise<boolean> {
