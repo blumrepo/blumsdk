@@ -52,6 +52,21 @@ export class Minter implements Contract {
     return res.totalSupply
   }
 
+  async getCoinPrice(provider: ContractProvider) {
+    let res = await provider.get('coin_price', [])
+    return Number(res.stack.readBigNumber()) / 10 ** 9
+  }
+
+  async getCoinsForTons(provider: ContractProvider, tons: bigint) {
+    let res = await provider.get('coins_for_tons', [{ type: 'int', value: tons }])
+    return [res.stack.readBigNumber(), res.stack.readBigNumber()]
+  }
+
+  async getTonsForCoins(provider: ContractProvider, coins: bigint) {
+    let res = await provider.get('tons_for_coins', [{ type: 'int', value: coins }])
+    return [res.stack.readBigNumber(), res.stack.readBigNumber()]
+  }
+
   async sendBuy(
     provider: ContractProvider,
     via: Sender,

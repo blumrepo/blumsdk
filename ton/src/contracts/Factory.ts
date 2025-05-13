@@ -52,7 +52,7 @@ export class Factory implements Contract {
       admin: res.stack.readAddress(),
       jettonAdmin: res.stack.readAddress(),
       feeRecipient: res.stack.readAddress(),
-      curveA: res.stack.readBigNumber(),
+      curveTon: res.stack.readBigNumber(),
       deployFee: res.stack.readBigNumber(),
       agentDeployFee: res.stack.readBigNumber(),
       buyFeeBasis: res.stack.readBigNumber(),

@@ -9,8 +9,8 @@ import { Fee } from './contracts/Fee'
 import { internalOnchainContentToCell } from '@ton-community/assets-sdk/dist/utils'
 import { Maybe } from '@ton/core/dist/utils/maybe'
 
-const CURVE_A = 653197264742n // 1500 TON
-const CURVE_A_TEST = 16000000000000n // 2.5 TON
+const CURVE_TON = toNano(1500)
+const CURVE_TON_TEST = toNano(2.5)
 
 export type JettonData = {
   name: string
@@ -23,15 +23,16 @@ export type JettonData = {
 
 export class BlumSdk {
   #testnet: boolean
+  #curveTon: bigint
   #tokenomics: Tokenomics
   public client: TonApiClientWrapper
 
   constructor(tonApiKey?: string, testnet: boolean = false, testCurve: boolean = false) {
     this.#testnet = testnet
 
-    const curveA = testCurve ? CURVE_A_TEST : CURVE_A
+    this.#curveTon = testCurve ? CURVE_TON_TEST : CURVE_TON
 
-    this.#tokenomics = new Tokenomics(curveA)
+    this.#tokenomics = new Tokenomics(this.#curveTon)
 
     this.client = new TonApiClientWrapper({
       baseUrl: testnet ? 'https://testnet.tonapi.io' : 'https://tonapi.io',
@@ -139,11 +140,7 @@ export class BlumSdk {
   }
 
   getThresholdTons(): bigint {
-    return this.#tokenomics.tonSupply(THRESHOLD_SUPPLY)
-  }
-
-  getTonSupply(totalSupply: bigint): bigint {
-    return this.#tokenomics.tonSupply(totalSupply)
+    return this.#curveTon
   }
 
   getMaxSupply(): bigint {
