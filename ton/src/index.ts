@@ -143,6 +143,10 @@ export class BlumSdk {
     return this.#curveTon
   }
 
+  getTonSupply(totalSupply: bigint): bigint {
+    return this.#tokenomics.calculateTonAmount(totalSupply, totalSupply)
+  }
+
   getMaxSupply(): bigint {
     return MAX_SUPPLY
   }
